@@ -1,8 +1,8 @@
 # Fdb version 4
-["pdflatex"] 1718905250 "/Users/christiancovington/qual_review/session_03/session_03.tex" "session_03.pdf" "session_03" 1718905251 0
+["pdflatex"] 1718919586 "/Users/christiancovington/qual_review/session_03/session_03.tex" "session_03.pdf" "session_03" 1718919587 0
   "../preamble.tex" 1718580769 24396 1be9f15b4deccc06210338a6029d4128 ""
   "/Users/christiancovington/Library/texlive/2023/texmf-var/fonts/pk/ljfour/public/bbm/bbm10.600pk" 1683387496 6964 6bc5787564f9c1c9eb86fc380ac020d2 ""
-  "/Users/christiancovington/qual_review/session_03/session_03.tex" 1718893920 1173 8d2cfcd19be25a1fccdb710cbeb4758d ""
+  "/Users/christiancovington/qual_review/session_03/session_03.tex" 1718919584 1173 8d2cfcd19be25a1fccdb710cbeb4758d ""
   "/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1136849721 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "/usr/local/texlive/2023/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2023/texmf-dist/fonts/tfm/jknappen/ec/tcrm1000.tfm" 1136768653 1536 e07581a4bb3136ece9eeb4c3ffab8233 ""
@@ -247,12 +247,12 @@
   "/usr/local/texlive/2023/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1679676516 4623355 b8cad38412faebe1ce5b780a45db67bd ""
   "/usr/local/texlive/2023/texmf-var/web2c/pdftex/pdflatex.fmt" 1679676464 7883458 8c599a728623eba10f928dc9a43b2604 ""
   "/usr/local/texlive/2023/texmf.cnf" 1678822455 577 1b2b1af17af2508fb20dd85783af4050 ""
-  "convergence.tex" 1718905250 22246 1a07657cb1e7b2707b3fb30eb10c4fe5 ""
-  "extra_exercises.tex" 1718736994 1884 cec48c195f4654ff99227b6f179eae62 ""
-  "session_03.aux" 1718905251 8765 1594552c0662f58cd085cca99f2a508a "pdflatex"
-  "session_03.out" 1718905251 3079 f05b1a0dcb562587dc481fd7ab2b0e63 "pdflatex"
-  "session_03.tex" 1718893920 1173 8d2cfcd19be25a1fccdb710cbeb4758d ""
-  "stochastic_processes.tex" 1718733451 11507 3c62577d3e921c7a7e22e76974accdf7 ""
+  "convergence.tex" 1718917432 22255 0a3039cdfcc8b17237543f314fbcf380 ""
+  "extra_exercises.tex" 1718919360 2380 438c93f8afab70fc440d43e298315fc3 ""
+  "session_03.aux" 1718919586 8765 1594552c0662f58cd085cca99f2a508a "pdflatex"
+  "session_03.out" 1718919586 3079 f05b1a0dcb562587dc481fd7ab2b0e63 "pdflatex"
+  "session_03.tex" 1718919584 1173 8d2cfcd19be25a1fccdb710cbeb4758d ""
+  "stochastic_processes.tex" 1718917448 11507 d2a56fae176595235c1f7248c1143ebe ""
   (generated)
   "session_03.aux"
   "session_03.log"

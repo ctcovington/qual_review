@@ -13,7 +13,7 @@
     \]
 
     \textit{Hint:} For any non-negative r.v.\ $Y$,  
-    $\E Y = \sum_{k=1}^{\infty} \Pr(Y \geq k)$ (This is called the ``layer cake representation''
+    $\E Y = \int_{t=0}^{\infty} \Pr(Y \geq t) dt$ (This is called the ``layer cake representation''
     of a non-negative discrete random variable).
 
     \textit{Note:} This is the set-theoretic notion of ``limsup'' -- i.e.\
@@ -36,13 +36,24 @@
     Assume toward a contradiction that 
     $\sum_{n=1}^{\infty} \Pr \left( X_1^2 \geq n \right) < \infty$.
     Then, by the hint we have 
-    \[
+    \begin{align*}
         \E X_n^2 
+            &= \int_{t=0}^{\infty} \Pr(X_1^2 > t) dt \\
+            &\leq \sum_{n=0}^{\infty} \Pr \left( X_1^2 > n \right) \comm{see below} \\
+            &\leq \sum_{n=0}^{\infty} \Pr \left( X_1^2 \geq n \right) \\
+            &\leq 1 + \sum_{n=1}^{\infty} \Pr \left( X_1^2 \geq n \right) \\
+            &<\infty. 
+    \end{align*}
+
+    As an aside, note that the second line follows because
+    \[
+        \int_{t=0}^{\infty} \Pr(X_1^2 > t) dt 
+        \leq 
+        \int_{t=0}^{\infty} \Pr(X_1^2 > \lfloor t \rfloor) dt
         =
-        \sum_{n=1}^{\infty} \Pr \left( X_1^2 \geq n \right)
-        <
-        \infty. 
+        \sum_{n=0}^{\infty} \Pr(X_1^2 > n).
     \]
+
     However, we know that $\E X_1^2 = \text{Var}(X_1) = \infty$, so we have 
     a contradiction. Therefore, it must be that 
     $\sum_{n=1}^{\infty} \Pr \left( X_1^2 \geq n \right) = \infty$.
