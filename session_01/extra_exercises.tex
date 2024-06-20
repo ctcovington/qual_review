@@ -1,0 +1,142 @@
+\section{Extra Exercises}
+
+\begin{tcolorbox}
+    \textbf{Exercise \#8: Does marginal independence imply conditional independence?}
+    Suppose $X,Y$ are r.v.\ such that $X \perp Y$.
+    Does this imply that $(X | Z) \perp (Y | Z)$?
+    
+    If so, prove it. If not, give a counterexample.
+\end{tcolorbox}
+
+\solution{
+    This is not true.
+    Let $X,Y$ be independent Bernoulli($0.5$) and let 
+    $Z = X+Y$. It will suffice to show that 
+    $\exists A$ s.t.\ $\E[XY | Z \in A] \neq \E [X | Z \in A] \E[Y | Z \in A]$.
+
+    Let's choose $A = \set{0,2}$. It will be important for us to note that 
+    $\Pr(Z = k | Z \in A) = \frac{1}{2}$ for $k \in \set{0,2}$, which can be seen by considering $Z \sim \text{Binomial}(2,0.5)$. 
+    \begin{align*}
+        \E[XY | Z \in A]
+            &= \Pr \left( X=1,Y=1 | Z \in A \right) \\
+            &= \Pr( Z = 2 | Z \in A ) \\ 
+            &= \frac{1}{2} \comm{symmetry of the r.v.\ $Z$}.
+    \end{align*}
+    Now let's consider $\E[X | Z \in A]$:
+    \begin{align*}
+        \E[X | Z \in A]
+            &= \Pr(X = 1 | Z \in A) \\
+            &= \underbrace{\Pr(X = 1 | Z = 0)}_{=0} \Pr(Z = 0 | Z \in A) + 
+               \underbrace{\Pr(X = 1 | Z = 2)}_{=1} \underbrace{\Pr(Z = 2 | Z \in A)}_{=1/2} \comm{law of total (conditional) probability}\\
+            &= \frac{1}{2}.
+    \end{align*}
+    By symmetry, we also know that $\E[Y | Z \in A] = \frac{1}{2}$. 
+    So, we have $\E[XY | Z \in A] \neq \E[X | Z \in A] \E[Y | Z \in A]$, and thus 
+    $X,Y$ are independent, but not independent conditional on $Z$.
+}
+
+\begin{tcolorbox}
+    \textbf{Exercise \#9 (G\&S 4.6.7):}
+    Let $X,Y$ be r.v.\ with correlation $\rho$. Show that 
+    \[
+        \E \left( \text{Var}(Y | X) \right)
+        \leq
+        (1-\rho^2) \text{Var}(Y).
+    \]
+\end{tcolorbox}
+\solution{
+    Without loss of generality, assume $\E X = \E Y = 0$.
+    It will be useful to note that
+    \begin{align*}
+        \E \left[ XY \right]^2
+            &= \E \left[ \E XY | X \right]^2 \comm{law of total expectation} \\
+            &= \E \left[ X (\E Y | X) \right]^2 \\
+            &\leq \E X^2 \cdot \E \left[ \E [Y|X]^2 \right] \comm{Cauchy-Schwarz} 
+    \end{align*}
+
+    Now, let's return to the statement we want to prove:
+    \begin{align*}
+        \E \left( \text{Var}(Y | X) \right)
+            &= \E \left( \E[Y^2 | X] - \E[Y|X]^2 \right) \comm{defn of conditional variance} \\
+            &= \E Y^2 - \E \left( \E[Y|X]^2 \right) \comm{law of total expectation, linearity of expectation} \\
+            &\leq \E Y^2 - \frac{ \E[XY]^2 }{\E X^2} \comm{note above} \\
+            &= \E[Y^2] \left( 1 - \frac{ \E[XY]^2 }{\E X^2 \E Y^2} \right) \\
+            &= \E[Y^2] (1 - \rho^2) \comm{$\rho(X,Y) = \frac{ \E[X - \E X] \E[Y - \E Y] }{ \E[X^2 - (\E X)^2]^{1/2} \E[Y^2 - (\E Y)^2]^{1/2} }$} \\
+            &= (1-\rho^2) \text{Var}(Y).
+    \end{align*}
+}
+
+\begin{tcolorbox}
+    \textbf{Exercise \#10 (G\&S 4.9.5):}
+    Let $X \sim N(0,1)$ and $a > 0$ be arbitrary.
+    Define 
+    \[
+        Y
+        =
+        \begin{cases}
+            X, &\text{ if } |X| < a \\
+            -X, &\text{ if } |X| \geq a.
+        \end{cases}
+    \]
+
+    Show that $Y \sim N(0,1)$ and find an expression for $\rho(a) = \text{Cor}(X,Y)$ in terms of the density $\phi$ of 
+    $X$.
+
+    Are $(X,Y)$ bivariate normal for all $a > 0$?
+
+    \emph{Hint: } You can assume that $\rho(a) = 0$ for some $a > 0$.
+\end{tcolorbox}
+\solution{
+    To show $Y \sim N(0,1)$ it suffices to show that $\Pr(Y \leq y) = \Pr(X \leq y)$ for all $y$.
+    Given the definition of $Y$, we separate showing this into two cases.
+
+    \textit{Case 1: $|y| \geq a$}
+    \begin{align*}
+        \Pr(Y \leq y)
+            &= \Pr \left( -X \leq y \right) \comm{defn of $Y$} \\
+            &= \Pr \left( X \leq y \right) \comm{$X$ is symmetric around 0, so $X \stackrel{d}{=} -X$}
+    \end{align*}
+
+    \textit{Case 2: $|y| \leq a$}
+    \begin{align*}
+        \Pr(Y \leq y)
+            &= \Pr (X \leq y) \comm{defn of $Y$}
+    \end{align*}
+
+    Thus, $\Pr(Y \leq y) = \Pr(X \leq y)$ for all $y$, and so we know $Y \stackrel{d}{=} X$ and so 
+    $Y \sim N(0,1)$.
+
+    Note that, because both $X,Y$ are mean 0 and variance 1, we can write $\rho(a) = \E XY$. Then,
+    \begin{align*}
+        \rho(a)
+            &= \E XY \\
+            &= \E \left[ X^2 \1{|X| \leq a} - X^2 \1{|X| \geq a} \right] \\
+            &= \E [X^2 \1{|X| \leq a}] - \E [X^2 \1{|X| \geq a}] \\
+            &= \int_{-a}^{a} x^2 \phi(x) dx - \int_{-\infty}^{-a} x^2 \phi(x) dx - \int_{a}^{\infty} x^2 \phi(x) dx \\
+            &= \int_{-a}^{a} x^2 \phi(x) dx - 2 \int_{a}^{\infty} x^2 \phi(x) dx \comm{$X$ is symmetric around 0} \\
+            &= \left( 1 - 2 \int_{a}^{\infty} x^2 \phi(x) dx \right) - 2 \int_{a}^{\infty} x^2 \phi(x) dx \comm{$\int_A f(x)dx = 1 - \int_{A^c} f(x)dx$} \\
+            &= 1 - 4 \int_{a}^{\infty} x^2 \phi(x) dx. 
+    \end{align*}
+
+    Finally, we will show that $(X,Y)$ are NOT bivariate normal for all $a > 0$.
+    Recall that, in the multivariate normal family, 0 correlation implies 
+    pairwise independence.\footnote{See Module 10, Slide 11 of BST 230 notes.}
+    By contraposition, pairwise dependence between $X,Y$ implies either that 
+    they have 0 correlation, or that they are not bivariate normal.
+
+    $(X,Y)$ are clearly not independent, as we can see either directly 
+    from the construction of $Y$ or by noting that, for $b > a$: 
+    \[
+        \Pr( X \geq b, Y \leq -b)
+        =
+        \underbrace{\Pr(Y \leq -b | X \geq b)}_{=1} \Pr (X \geq b)
+        =
+        \Pr(X \geq b)
+        \neq 
+        \Pr(X \geq b) \Pr(Y \leq -b),
+    \] 
+    where the final inequality follows because $X,Y$ are both $\sim N(0,1)$ 
+    and so $\Pr(X \geq b),\Pr(Y \leq -b) \neq 0$ for any $b$.
+
+    Thus, $(X,Y)$ must not be bivariate normal.
+}

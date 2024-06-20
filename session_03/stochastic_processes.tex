@@ -1,0 +1,278 @@
+\section{Stochastic Processes (BST 230 Module 14)}
+
+\subsection{Definition and Tools}
+
+\begin{definition}[Stochastic Process]
+    For a probability space $(\Omega, \cF, \Pr)$,
+    measurable space $(S, \Sigma)$, and index set $T$, 
+    a stochastic 
+    process is a collection of r.v.\  
+    \[
+        \set{X_t: t \in T}
+    \]
+    where $X_t: \Omega \rightarrow S$.
+\end{definition}
+
+An alternate viewpoint which is sometimes used is to 
+think of the stochastic process in terms of each $\omega \in \Omega$
+having a ``sample path'' $t \mapsto X(t,\omega)$, which shows 
+how, for a fixed $\omega$, our outcome $X_t(\omega)$ evolves over time.
+
+Before we dive further into stochastic processes, it will be useful 
+to developing a unifying language we can use to analyze many stochastic processes.
+
+\begin{definition}[Generating Function]
+    The generating function of a sequence of real numbers $a = \set{a_0, a_1, \hdots}$ is 
+    \[
+        G_a(s) = \sum_{n=0}^{\infty} a_n s^n.
+    \]
+\end{definition}
+
+At times we may want to take two sequences $(a_n),(b_n)$ and create 
+a new sequence $(c_n)$ where $c_n = \sum_{k=0}^{n} a_k b_{n-k}$.
+We call $c_n$ the \emph{convolution} of $a_n,b_n$ and denote it as 
+$c = a * b$.
+
+\begin{theorem}[Convolution Formula]
+    For sequences $a = (a_0, a_1, \hdots)$ and $b = (b_0, b_1, \hdots)$
+    we have $G_{a * b}(s) = G_a(s) G_b(s)$.
+\end{theorem}
+
+For a discrete random variable $X$ taking values in a countable 
+set $\cX = (x_1, x_2, \hdots)$,
+one can imagine letting $a_n = \Pr(X = x_n)$, which gives rise to the idea 
+of a \emph{probability-generating function}.
+
+\begin{definition}[Probability-Generating Function]
+    Let $X$ be a random variable taking values in $\cX = (x_1, x_2, \hdots)$. 
+    Then we call $G_{X}(s) = \sum_{n=1}^{\infty} \Pr(X=x_n) s^n$ the 
+    probability-generating function of $X$.
+    
+    Equivalently, one can think of $G_X(s) = \E(s^X)$ for $s \in [-1,1]$.
+\end{definition}
+
+Note the abuse of notation here;
+instead of subscripting the generating function with the set of real numbers,
+we subscript it with the random variable whose pmf is implied by this set (along 
+with the space $\cX$). In practice, we will often deal with random variables who take 
+values either on $\Z$ or $\N$.
+
+Probability-generating functions have a few useful properties. To simplify, let's 
+assume that $\cX = \N$ such that $X$ takes only non-negative integral values.
+
+\begin{itemize}
+    \item $G_X(s)$ is infinitely differentiable on $(-1,1)$ and $\Pr(X = k) = \frac{G^{(k)}(0)}{k!}$
+    \item $G_X(1) = 1$
+    \item $\E X = G'_X(1)$
+    \item $\text{Var}(X) = G_X^{''}(1) + G'_X(1)(1 - G'_X(1))$
+    \item $\E \frac{X!}{(X-k)!} = G_X^{(k)}(1)$
+\end{itemize}
+
+It turns out that convolutions can help us understand sums of independent 
+r.v.\
+
+\begin{theorem}[PGF of sum of independent r.v.]
+    Let $X,Y$ be independent r.v.\ defined on $\N$ with pmfs $p_X, p_Y$.
+    Then $G_{X+Y}(s) = G_{X*Y}(s) = G_X(s) G_Y(s)$.
+\end{theorem}
+
+This fact can be generalized to the case where we have a sum of r.v.\ where the 
+number of items being summed is itself a random variable.
+
+\begin{theorem}[Compounding Formula]
+    Let $(X_i)$ be a sequence of iid r.v.\ with a shared 
+    pgf $G_X(s)$ and 
+    $N \in \N$ be a random variable with pgf $G_N(s)$.
+    Then $Z_N = \sum_{i=1}^{n} X_i$ has the pgf
+    \[
+        G_{Z_N}(s)
+        =
+        G_N \left( G_X(s) \right).
+    \]
+\end{theorem}
+
+\begin{tcolorbox}
+    \textbf{Exercise \#6: Wald's Identity}
+    Using the random variables defined in the theorem above,
+    show that 
+    \[
+        \E Z_N
+        =
+        \E [N] \E[X_1].
+    \]
+    \textit{NOTE:} this is a very useful fact to know
+\end{tcolorbox}
+\solution{
+    This follows from the rules we've defined above and an application of the chain rule.
+    \begin{align*}
+        \E Z_N
+            &= G'_{Z_N}(1) \\
+            &= G'_N(G_{X_1}(1)) G'_{X_1}(1) \comm{chain rule: $(f(g(x)))' = f'(g(x))g'(x)$} \\
+            &= G'_N(1) G'_{X_1}(1) \comm{$G_{X_1}(1) = 1$ by construction of pgf} \\
+            &= \E[N] \E[X_1]
+    \end{align*}
+}
+
+\subsection{Branching Processes (Galton-Watson)}
+
+Branching processes model the number of individuals in a population over 
+a number of generations. We assume that individuals survive for only one generation.
+\begin{itemize}
+    \item $Z_n$: number of individuals at generation $n$ (assume $Z_0=1$)
+    \item $X_{n,i}$: number of offspring had by individual $i$ in generation $n$
+    \item $(X_{n,i})$ are iid (over both $n$ and $i$) with pgf $G_X(s)$ 
+\end{itemize}
+
+Note that $Z_{n+1} = \sum_{i=1}^{Z_n} X_{n,i}$, so by the compounding formula
+and iteration, $G_{Z_{n+1}} = G_{Z_n}(G_X(s)) = \hdots$. Iterating 
+further tells us that $G_{Z_n}$ is 
+given by the $n$-fold composition of $G_x$.
+
+\begin{tcolorbox}
+    \textbf{Exercise \#7}
+    Show that if each individual is expected to have $\mu$ offspring, then
+    $\E Z_n = \mu^n$.
+\end{tcolorbox}
+\solution{
+    \begin{align*}
+        \E Z_n
+            &= \E \left( \sum_{i=1}^{Z_{n-1}} X_{(n-1), i} \right) \\
+            &= \E[Z_{n-1}] \mu \comm{Wald's identity}
+    \end{align*}
+    Then, by an inductive argument carrying this out $n$ times, 
+    we get $\E Z_n = \mu^n$.
+}
+
+We may also be interested in the probability of ``ultimate extinction''; 
+that is, $\lim_{n \rightarrow \infty} \Pr(Z_n = 0)$.
+The probability of ultimate extinction is 1 if $\mu \leq 1$ and 
+is $< 1$ if $\mu > 1$.\footnote{Technically, this assumes some 
+randomness in the number of offspring. If 
+each individual always has exactly one offspring, then the probability 
+of extinction is 0 even though $\mu=1$.}
+
+\subsection{Poisson Processes}
+
+\begin{definition}[Poisson Process]
+    Let $(X_i)$ be a sequence of iid r.v.\ with $X_i \sim \text{Exp}(\lambda)$ and 
+    define $T_n = \sum_{i=1}^{n}X_i$.
+
+    Define $Y_t = \sum_{n=1}^{\infty} \1{T_n \leq t}$ for $t \geq 0$.
+    Then we call the continuous-time stochastic process $(Y_t)$ a 
+    Poisson process with arrival times $(T_1, T_2, \hdots)$.
+\end{definition}
+
+We call this a Poisson process because $Y_t \sim \text{Pois}(\lambda t)$.
+If we define $t_0 < t_1 < \hdots < t_k$ and $W_i = Y_{t_i} - Y_{t_{i-1}}$,
+then $W_i \perp W_j$ for $i \neq j$ and 
+$W_i \sim \text{Pois}(\lambda(t_i - t_{i-1}))$.
+That is, $W_i$ is the number of arrivals in the interval $(t_{i-1}, t_i]$ 
+and this number is Poisson, scaled by the width of this interval (i.e.\ the 
+amount of time being considered) as well as the baseline rate $\lambda$.
+Moreover, for two disjoint time intervals, the number of 
+arrivals in the second interval is independent of the number of arrivals in the first.
+
+\subsection{Martingales}
+
+Martingales are a class of stochastic processes which 
+are both reasonably simple to define and encompass 
+many other types of stochastic processes. 
+This provides potentially huge benefits to us
+when confronted with a new stochastic process; if 
+we can represent it as a martingale, we immediately 
+get a large number of powerful results for analyzing it.
+
+Martingales come in both discrete-time and continuous-time
+varieties, but we'll focus on the discrete-time case.
+
+\begin{definition}[Martingale]
+    A discrete time stochastic process 
+    $(Y_n)$ is a martingale with respect to another 
+    process $(X_n)$
+    if
+    \begin{align*}
+        \sup_{n} \E |Y_n| &< \infty \\
+        \E Y_{n+1} | X_{1:n} &= Y_n \text{ for all } n \in \N.
+    \end{align*}
+\end{definition}
+
+These simple conditions are already enough to guarantee 
+almost sure convergence of $(Y_n)$ to some r.v.\ $Y$.
+
+\begin{theorem}[Martingale Convergence Theorem]
+    If $(Y_n)$ is a martingale, there exists a r.v.\ 
+    $Y$ such that $Y_n \cvas Y$.
+
+    If $\limsup_n \E Y_n^2 < \infty$, the we also know that 
+    $Y_n \cvL{2} Y$.
+\end{theorem}
+
+\begin{tcolorbox}
+    \textbf{Exercise \#8}
+    Let $(X_n)$ be a sequence of r.v.\ where 
+    $X_0 = \frac{1}{2}$ and $X_n \sim \text{Unif}(0, 2 X_{n-1})$ for $n \geq 1$.
+    Assume the randomness in this uniform is independent; in other words,
+    $Y_n = \frac{X_n}{2X_{n-1}} \stackrel{iid}{\sim} \text{Unif}(0,1)$.
+
+    \textbf{(a)} Show that $X_n \cvas 0$.
+
+    \textit{Hint:} Show that $(X_n)$ is a martingale where each element can be
+    written as $X_n = \prod_{i=1}^{n} U_i$ where $U_i \stackrel{iid}{\sim} \text{Unif}(0,1)$,
+    and show that it converges almost surely to some r.v.
+    Then use non-martingale techniques to show that $X_n \cvas 0$.
+
+    \textbf{(b)} Does $X_n \cvL{1} 0$? If so, prove it. If not, prove that it does not.
+
+    \textbf{NOTE: This is not the greatest example because the martingale step isn't really necessary,
+    but it is a generally useful tool worth practicing.}
+\end{tcolorbox}
+
+\solution{
+    \paragraph{Part (a1): form of $X_n$}
+    By the scaling properties of the uniform distribution,
+    it is immediate that $X_n = 2X_{n-1} U_{n}$ where $U_n \sim \text{Unif}(0,1)$. Then, by 
+    induction, we see that $X_n = 2^n X_0 \prod_{i=1}^{n} U_n = 2^{n-1} \prod_{i=1}^{n} U_i$ where the $U_i$ are independent.
+
+    \paragraph{Part (a2): Show $(X_n)$ is martingale}
+    Now let's show that $(X_n)$ is a martingale. Because $X_n$ is a product of elements $\in (0,1)$,
+    $X_n \in (0,1)$ and so $\sup_n \E |X_n| \leq 1 < \infty$. Then, note that we can write
+    \begin{align*}
+        \E X_{n+1} | X_{1:n}
+            &= \E X_{n+1} | X_n \comm{$(X_n)$ is a Markov chain} \\
+            &= \E \left[ \text{Unif}(0, 2 X_{n}) | X_n \right] \\
+            &= X_n.
+    \end{align*}
+    So, $(X_n)$ is a martingale. Thus, by the martingale convergence theorem we know that 
+    $X_n \cvas X$ for some r.v.\ $X$. It now just remains to show that $X = 0$.
+
+    \paragraph{Part (a3): Show $X_n \cvas 0$}
+    Let's consider $\log X_n = \log \left( 2^{n-1} \prod_{i=1}^{n} U_i \right) = (n-1)\log 2 + \sum_{i=1}^{n} \log(U_i)$.
+    By the strong law of large numbers, we know that $n^{-1} \sum_{i=1}^{n} \log U_i \cvas \E \log(U_i) = -1$.
+    We calculate this $-1$ by noting that $\E \log(U_i) = \int_0^t \log(u)du = -1$.
+    Thus, we have
+    \begin{align*}
+        \log X_n
+            &= (n-1)\log 2 + \sum_{i=1}^{n} \log(U_i) \\
+            &= n \left( \underbrace{\frac{n-1}{n} \log 2}_{\cvas \log 2} + \underbrace{\frac{1}{n} \sum_{i=1}^{n} \log(U_i)}_{\cvas -1} \right) \\
+            &\cvas -\infty \comm{ because $n \cdot c \stackrel{n \rightarrow \infty}{\rightarrow} -\infty$ for $c < 0$ and $\log 2 - 1 < 0$}
+    \end{align*}
+
+    The $\exp(\cdot)$ function is continuous, 
+    so the continuous mapping theorem tells us that $X_n = \exp \left( \log X_n \right) \cvas \exp(-\infty) = 0$.
+
+    \paragraph{Part (b): Does $X_n \cvL{1} 0$?}
+    No, we can see this using the law of total expectation and martingale property inductively:
+    \begin{align*}
+        \E X_n
+            &= \E \left[ \E[X_n | X_{1:(n-1)}] \right] \comm{law of total expectation} \\
+            &= \E \left[ X_{n-1} \right] \comm{martingale property} \\
+            &= \E \left[ \E[X_{n-1} | X_{1:(n-2)} \right] \\
+            &= \E \left[ X_{n-2} \right] \\
+            &\vdots \\
+            &= \E X_0 \\
+            &= \frac{1}{2}.
+    \end{align*}
+    So $\E X_n = \frac{1}{2}$ for all $X_n$. Recall that $X_n \cvL{p} X \implies \E |X_n|^p \rightarrow \E |X|^p$.
+    So, $X_n \cvL{1} 0 \implies \E |X_n| \rightarrow 0$. However, we see that $\E X_n = \E |X_n| = \frac{1}{2}$,
+    so we have a contradition and know that $X_n$ cannot converge in $L^1$ to 0.
+}  

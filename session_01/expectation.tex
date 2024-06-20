@@ -1,0 +1,105 @@
+\section{(Conditional) Expectation (Modules 4/7 of BST 230 Notes)}
+
+Let $X$ be a r.v.\ with pdf/pmf $f_X$. 
+Then, for any measurable function $g$ we write the \emph{expectation} of $g(X)$ as
+\begin{align*}
+    \E g(X)
+        &= \sum_{x \in \mathcal{X}} g(x) f_X(x) \hspace{5pt} (\text{for discrete r.v.}) \\
+    \E g(X)
+        &= \int_{-\infty}^{\infty} g(x) f_X(x) dx \hspace{5pt} (\text{for continuous r.v.})
+\end{align*}
+
+Likewise, for a random vector $(X,Y)$ we write the \emph{conditional expectation} of 
+$g(X)$ given $Y=y$ as
+\begin{align*}
+    \E g(X) | Y=y
+        &= \sum_{x \in \mathcal{X}} g(x) f_{X|Y}(x|y) \hspace{5pt} (\text{for discrete r.v.}) \\
+    \E g(X) | Y=y
+        &= \int_{-\infty}^{\infty} g(x) f_{X|Y}(x|y) dx \hspace{5pt} (\text{for continuous r.v.})
+\end{align*} 
+
+Conditional expectation is well-defined if either $\E g(X)^+ | y < \infty$ or 
+$\E g(X)^- | y < \infty$.
+
+Conditional expectation is itself a r.v.\; e.g.\ define the function 
+$h(y) = \E g(X) | Y=y$, then $g(Y) = \E g(X) | Y$ is a r.v.
+
+\begin{theorem}[Law of Total Expectation]
+    Let $X$ be a r.v.\ with expected value $\E X$ and $Y$ be a r.v.
+    Then,
+    \[
+        \E X = \E \left[ \E X | Y \right].
+    \]
+\end{theorem}
+
+One particularly useful application of the law of total expectation is 
+to let $Y$ be a categorical r.v.\ taking values over a countable partition $\set{A_i}_{i \in \N}$
+of the sample space $\Omega$. This yields
+\begin{align*}
+    \E X
+        &= \E \left( \E X | Y \right) \comm{law of total expectation} \\
+        &= \sum_{i \in \N} \E (X | A_i) \Pr(A_i).
+\end{align*}
+
+\begin{theorem}[Law of Total Variance]
+    Let $X$ be a r.v.\ with finite variance and $Y$ be a r.v.\
+    Then,
+    \[
+        \text{Var}(X)
+        =
+        \E \left[ \text{Var}(X | Y) \right] + \text{Var} \left( \E Y | X \right)
+    \]
+\end{theorem}
+
+\begin{tcolorbox}
+    \textbf{Exercise \#3:}
+    Suppose our company sells $n$ widgets, each which breaks (independently)
+    with probability $p$. We give independent 
+    random payouts $Y_i$ to the buyers whose widgets break. Each payout
+    follows an Exp($\lambda$) distribution.
+
+    Let $X$ be a r.v.\ representing the number of widgets that break and 
+    $Y$ a r.v.\ representing our total payout to buyers. 
+
+    Show that 
+    \begin{align*}
+        \E Y &= \frac{n p}{\lambda} \\
+        \text{Var} (Y) &= \frac{np(2-p)}{\lambda^2}.
+    \end{align*}
+
+    \textit{Hint: } Recall that the mean/variance of a Binomial($n,p$) are $(np, np(1-p))$
+                  and the mean/variance of an Exp($\lambda$) are $(\lambda^{-1}, \lambda^{-2})$.
+\end{tcolorbox}
+
+\solution{
+    We'll use the laws of total expectation and variance.
+    Note that 
+    \[
+        \E [Y | X = k] 
+        = 
+        \E \left[ \sum_{i=1}^{k} \text{Exp}(\lambda) \right]
+        =
+        k \lambda^{-1}.
+    \]
+
+    Reinterpreting this as a r.v.\ we have 
+    $\E Y | X = X \lambda^{-1}$. So,
+
+    \begin{align*}
+        \E Y
+            &= \E \left[ \E Y | X \right] \comm{law of total expectation} \\
+            &= \E X \lambda^{-1} \\
+            &= \frac{n p}{\lambda}.
+    \end{align*}
+
+    Because $Y | X = k$ is a sum of iid r.v.\ we know that 
+    $\text{Var}(Y | X) = \text{Var}(\sum_i^X Y_i | X) = X \text{Var}(Y_1) = X \lambda^{-2}$
+
+    \begin{align*}
+        \text{Var}(Y)
+            &= \E \left[ \text{Var}(Y | X) \right] + \text{Var} \left( \E Y | X \right) \comm{law of total variance} \\
+            &= \E [X \lambda^{-2}] + \text{Var} \left( X \lambda^{-1} \right) \\
+            &= \frac{np}{\lambda^2} + \frac{np(1-p)}{\lambda^2} \\
+            &= \frac{np(2-p)}{\lambda^2}.
+    \end{align*}
+}

@@ -1,0 +1,285 @@
+\section{Basics (Modules 2/3/7 of BST 230 Notes)}
+
+\subsection{Motivating Axiomatic Probability}
+
+When we think about data, we consider it to be the result of some \emph{experiment}.
+We refer to the set of all possible outcomes of this experiment $\Omega$ as the \emph{sample space}.
+For example, if our experiment is a single flip of a coin, 
+$\Omega = \set{H, T}$; if our experiment involves flipping two coins,
+$\Omega = \set{HH, HT, TH, TT}$.
+
+Let $A \subseteq \Sigma$ be any set of possible outcomes; we call
+$A$ an event. If we have a bunch of events $A_i$ we call the 
+set of all these events $\cF = \set{A_i}$, an \emph{event space}.
+The purpose of a probability function $\Pr: \cF \rightarrow [0,1]$
+is to assign each event $A_i$ its ``probability''.
+
+Andrey Kolmogorov introduced what is now the dominant notion of the 
+\emph{axioms of probability} in the 1930s. These axioms effectively constrain
+both the event space $\cF$ and the probability function $\Pr$ to exhibit the behavior we've come to 
+take for granted.
+
+First, we require that the event space $\cF$ be something called a \emph{$\sigma$-algebra}.
+We say that $\cF$ is a $\sigma$-algebra on $\Omega$ if $\cF \subseteq 2^{\Omega}$ 
+(i.e.\ $\cF$ is a set of subsets of $\Omega$) with the following properties:
+
+\begin{itemize}
+    \item $\emptyset \in \cF$
+    \item $A \in \cF \implies A^c \in \cF$
+    \item $A_1, A_2, \hdots \in \cF \implies \cup_{i=1}^{\infty} A_i \in \cF$.
+\end{itemize}
+
+Kolmogorov's axioms also require the following conditions on the 
+probability function $\Pr$:
+
+\begin{itemize}
+    \item Axiom \#1: $\Pr: \cF \rightarrow [0,1]$
+    \item Axiom \#2: $\Pr(\Omega) = 1$
+    \item Axiom \#3: If $\set{A_i}_{i \in [n]}$ are pairwise disjoint and 
+                     $A_i \in \cF$ for all $i \in [n]$, then 
+                     $\Pr \left( \cup_{i=1}^{n} A_i \right) = \sum_{i=1}^{n} \Pr(A_i)$
+\end{itemize}
+
+We put the elements $(\Omega, \cF, \Pr)$ together to form a 
+\emph{probability space}. Whenever you reason about probabilities, 
+you are doing so with respect to a probability space.
+
+\subsection{The Calculus of Probability}
+
+These axioms will give rise to the fundamental 
+calculus of probabilities, but first we need some basic set theory:
+
+\begin{theorem}[C\&B Theorem 1.1.4]
+    Let $A,B,C$ be events in an event space $\cF$ defined on a sample 
+    space $\Omega$. Then, 
+
+    \begin{enumerate}[label=(\alph*)]
+        \item \textit{Commutativity} \[ A \cup B = B \cup A, \]
+        \[ A \cap B = B \cap A; \]
+        \item \textit{Associativity} \[ A \cup (B \cup C) = (A \cup B) \cup C, \]
+        \[ A \cap (B \cap C) = (A \cap B) \cap C; \]
+        \item \textit{Distributive Laws} \[ A \cap (B \cup C) = (A \cap B) \cup (A \cap C), \]
+        \[ A \cup (B \cap C) = (A \cup B) \cap (A \cup C); \]
+        \item \textit{DeMorgan's Laws} \[ (A \cup B)^c = A^c \cap B^c, \]
+        \[ (A \cap B)^c = A^c \cup B^c. \]
+    \end{enumerate}
+\end{theorem}
+
+We use these facts, along with the probability axioms, to produce fundamental 
+rules for the probability function:
+
+\begin{theorem}[C\&B Theorems 1.8 \& 1.9]
+    \label{thm:1.8_1.9}
+    Let $A,B$ be events in an event space $\cF$ defined on a sample 
+    space $\Omega$, and $\Pr$ an associated probability function.
+    Then,
+    \begin{enumerate}[label=(\alph*)]
+        \item $\Pr(\emptyset) = 0$
+        \item $\Pr(A) \leq 1$
+        \item $\Pr(A^c) = 1 - \Pr(A)$
+        \item $\Pr(B \cap A^c) = \Pr(B) - \Pr(A \cap B)$
+        \item $\Pr(A \cup B) = \Pr(A) + \Pr(B) - \Pr(A \cap B)$
+        \item $A \subseteq B \implies \Pr(A) \leq \Pr(B)$ 
+    \end{enumerate}
+\end{theorem}
+
+\begin{tcolorbox}
+    \textbf{Exercise \#1 (C\&B Theorem 1.2.11):}
+    Let $A \in \cF$ and suppose $\set{C_i}$ is a (potentially countably infinite) partition of $\Omega$ such that 
+    $C_i \cap C_j = \emptyset$ for $i \neq j$ and $\cup_i C_i = \Omega$.
+
+    Prove the law of total probability; i.e.\ that 
+    \[
+        \Pr(A)
+        =
+        \sum_{i} \Pr(A \cap C_i)
+    \]
+\end{tcolorbox}
+\solution{
+    First note that 
+    \begin{align*}
+        A
+            &= A \cap \Omega \comm{$A \subseteq \Omega$} \\
+            &= A \cap \left( \cup_i C_i \right) \comm{$\set{C_i}$ are partition of $\Omega$} \\
+            &= \bigcup_i \left( A \cap C_i \right). \comm{Distributive Law}
+    \end{align*}
+
+    Because the two events are equivalent, they have the same probability;
+    you can see this because if $A = B$, then $A \cup \emptyset = B$,
+    and thus 
+    \[
+        \Pr(B) = \Pr(A \cup \emptyset) 
+               = \underbrace{\Pr(A) + \Pr(\emptyset)}_{\text{Axiom} \#3} 
+               = \underbrace{\Pr(A) + 0}_{\text{Thm}~\ref{thm:1.8_1.9} \text{ (a)}} 
+               = \Pr(A).
+    \] 
+    So, we have
+    \begin{align*}
+        \Pr(A)
+            &= \Pr \left( \bigcup_i \left( A \cap C_i \right) \right) \\
+            &= \sum_i \Pr(A \cap C_i) \comm{$\set{C_i}$ disjoint $\implies \set{A \cap C_i}$ disjoint}
+    \end{align*}
+}
+
+\subsection{Random Variables}
+
+\subsubsection{Discrete/Continuous/Neither}
+
+A random variable (r.v.) $X: \Omega \rightarrow \R$ is a function from the 
+sample space to the real numbers.\footnote{We're ignoring conditions on 
+the ``measurability'' of $X$ which are irrelevant for you now, but will be 
+relevant to those who take BST 240}. We call $\set{X(\omega): \omega \in \Omega}$
+the \emph{range} of $X$. $X$ is said to be \emph{discrete} if the range is countable.
+Discrete r.v.\ have a \emph{probability mass function (pmf)} $f_X(x) = \Pr(X = x)$
+and \emph{cumulative distribution function (cdf)} $F_X(x) = \Pr(X \leq x)$.
+The cdf of a discrete r.v.\ is always discontinuous.
+
+If $X$ is a r.v.\ with continuous cdf $F_X(x) = \Pr(X \leq x)$ we say that 
+$X$ is a \emph{continuous r.v.} Continuous r.v.\ do not have pmfs and the 
+$\Pr(X = x) = 0$ for all $x$. We instead define the \emph{probability density function (pdf)}
+as the function $f: \R \rightarrow [0,\infty)$ such that 
+\[
+    \forall x \in \R:
+    F_X(x) = \int_{-\infty}^{x} f_X(t) dt.
+\]
+By the fundamental theorem of calculus, this also tells us that 
+$f_X(x) = \frac{d}{dx} F_X(x)$.
+
+For continuous r.v.\ it's not useful (as stated above) to think about $\Pr(X = x)$ as it's 
+always 0. Instead, we consider statement like $\Pr(X \in A) = \int A f(x) dx$. 
+
+The fact that we define discrete and continuous r.v.\ in qualitatively different ways 
+(and not, say, ``any r.v.\ with an uncountably infinite range is continuous'') suggests 
+that there are r.v.\ which are neither discrete nor continuous. 
+In these cases, we cannot define either a pmf or pdf, but we can still reason about the cdf.
+In particular, we can always make statements of the kind ``what is the probability that $X$ 
+is in $A$'' for any $A \subseteq \R$. We calculate this by defining\footnote{This formulation is given on Slide 17 of the 
+BST 230 Lecture 3 notes, but there's a typo in that version.}
+\begin{align*}
+    \Pr \left( X \in A \right)
+        &= \Pr \left( X^{-1}(A) \right) \\
+        &= \Pr \left( \set{\omega \in \Omega: X(\omega) \in A} \right).
+\end{align*}
+
+\subsubsection{Independence and Identical Distributions}
+When we reason about relationships between random variables
+we will often use the notions of ``independence'' and ``identical (equal in) distribution''.
+
+\begin{definition}[Independence]
+    We will present four different definitions: \newline
+
+    \textbf{Definition 1}
+    $(X_1, \hdots, X_n)$ are independent if and only if
+    \[
+        \Pr(\cap_{i=1}^{n} X_i \in A_i)
+        =
+        \prod_{i=1}^{n} \Pr(X_i \in A_i)
+    \]
+    for all measurable subsets $A_1, \hdots, A_n \subseteq \R$.
+
+    \textbf{Definition 2}
+    $(X_1, \hdots, X_n)$ are independent if
+    \[
+        f_{X_{1:n}}(x_{1:n})
+        =
+        \prod_{i=1}^{n} f_{X_i}(x_i)
+    \]
+
+    \textbf{Definition 3}
+    $(X_1, \hdots, X_n)$ are independent if and only if 
+    \[
+        F_{X_{1:n}}(x_{1:n})
+        =
+        \prod_{i=1}^{n} F_{X_i}(x_i),
+    \]
+    where $F_{X_{1:n}}(x_{1:n}) = \Pr \left( \cap_{i=1}^{n} \set{X_i \leq x_i} \right)$.
+
+    \textbf{Definition 4}
+    $(X_1, \hdots, X_n)$ are independent if and only if, for all 
+    measurable functions $\phi_1, \hdots, \phi_n$:
+    \[
+        \E \prod_{i=1}^{n} \phi_i(X_i)
+        =
+        \prod_{i=1}^{n} \E \phi_i(X_i).
+    \]
+\end{definition}
+
+First, note that every definition (except for \#2) is an ``if and only if'' statement,
+so they can be used both to reason about properties of independent r.v.\ and 
+to prove that a set of r.v.\ with said property are independent.
+
+\begin{definition}[Equality in distribution]
+    We say that r.v.\ $X$ and $Y$ are ``equal in distribution'' (i.e.\ $X \stackrel{d}{=} Y$) 
+    if
+    \[
+        \forall x \in \R:
+        F_X(x) = F_Y(x).
+    \] 
+\end{definition}
+
+\subsection{Combinatorics}
+
+In combinatorics we are considering, roughly, how many ways we can choose $k$ things from a group of $n$.
+Two features of the process (other than $k$ and $n$) dictate how we think about this. 
+The first is whether or not the sampling happens with or without replacement; this is simply 
+whether or not an item, after being selected, is placed back in the pool and able to be reselected.
+The second is whether or not order matters in our selection; for example do we consider drawing 
+a blue ball and then a red ball qualitatively different than drawing a red ball and then a blue ball.
+A selection of items in which order doesn't matter is often called a \emph{combination}; likewise 
+a selection in which order does matter is called a \emph{permutation}.
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|c|c|c|}
+    \hline
+     & \textbf{without replacement} & \textbf{with replacement} \\ \hline
+    \textbf{ordered} & $\frac{n!}{(n-k)!}$ & $n^k$ \\ \hline
+    \textbf{unordered} & $\binom{n}{k}$ & $\binom{n+k-1}{k}$ \\ \hline
+    \end{tabular}
+\end{table}
+    
+
+\begin{tcolorbox}
+    \textbf{Exercise \#2 (G\&S Exercise 3.4.7)}
+    Let $G = (V,E)$ be a finite graph with a set of vertices $V$ and set of edges $E$ between the vertices.
+    That is, for any two vertices $v_1,v_2 \in V$, they have an edge between them if the pair $(v_1,v_2) \in E$.
+
+    For any $W \subseteq V$ and edge $e \in E$, define 
+    \[ 
+        I_W(e) = \1{ \exists v \in W, v' \in W^c \text{ s.t. } e = (v,v') }.
+    \]
+    That is, $I_W(e)$ is an indicator for whether or not $W$ and $W^c$ are connected by $e$.
+
+    Let $N_W = \sum_{e \in E} I_W(e)$ and show that there exists $W \subseteq V$ such that 
+    $N_W \geq \frac{1}{2} |E|$.
+
+    \textit{Hint: } To show that such a $W$ exists, try constructing random $W$ and showing that 
+                  $\Pr \left( N_W \geq \frac{1}{2} |E| \right) > 0$; therefore, such a $W$ must exist.
+    
+\end{tcolorbox}
+
+\solution{
+    Let the graph $G = (V,E)$ be given to us. 
+    We'll construct a random subset $W \subseteq V$ as follows; for each vertex $v \in V$, 
+    let $\1{v \in W} \sim \text{Bernoulli}(0.5)$. Suppose each $v$ is assigned to $W$ or $W^c$
+    independently.
+    
+    For a given $e = (v,v') \in E$, we know that 
+    \begin{align*}
+        \E I_W(e)
+            &= \E \1{ \exists v \in W, v' \in W^c \text{ s.t. } e = (v,v') } \\
+            &= \E \1{ \left( v \in W \cap v' \in W^c \right) \cup  \left( v \in W^c \cap v' \in W \right) } \\
+            &= \Pr \left( v \in W \cap v' \in W^c \right) \cup \left( v \in W^c \cap v' \in W \right) \\
+            &= \Pr \left( v \in W \cap v' \in W^c \right) + \Pr \left( v \in W^c \cap v' \in W \right) \comm{events are disjoint} \\
+            &= \Pr \left( v \in W \right) \Pr(v' \in W^c) + \Pr \left( v \in W^c \right) \Pr(v' \in W) \comm{$v,v'$ assigned independently} \\
+            &= \frac{1}{2} \cdot \frac{1}{2} + \frac{1}{2} \cdot \frac{1}{2} \\
+            &= \frac{1}{2}.
+    \end{align*} 
+
+    Now recall that $N_W = \sum_{e \in E} I_W(e)$. By linearity of expectation, we have 
+    \[
+        \E N_W = \sum_{e \in E} \E I_W(e) = \sum_{e \in E} \frac{1}{2} = \frac{1}{2} |E|.
+    \]
+    $N_W$ is a random variable with expectation $\frac{1}{2} |E|$, so $\Pr(N_W \geq \frac{1}{2} |E|) > 0$.
+    Thus, by the hint, there exists a $W$ such that $N_W \geq \frac{1}{2} |E|$ and we're done.
+}

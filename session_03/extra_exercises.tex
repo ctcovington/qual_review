@@ -1,0 +1,56 @@
+\section{Extra Exercises}
+
+\begin{tcolorbox}
+    \textbf{Exercise \#9}
+    Let $(X_n)$ be an iid sequence with $\E X_1=0$ and
+    $\text{Var}(X_1) = \infty$.
+
+    Prove that
+    \[
+        \Pr \left( \limsup_n \set{|X_n| \geq \sqrt{n}} \right)
+        =
+        1.
+    \]
+
+    \textit{Hint:} For any non-negative r.v.\ $Y$,  
+    $\E Y = \sum_{k=1}^{\infty} \Pr(Y \geq k)$ (This is called the ``layer cake representation''
+    of a non-negative discrete random variable).
+
+    \textit{Note:} This is the set-theoretic notion of ``limsup'' -- i.e.\
+    $x \in \limsup_n E_n \iff x \in E_n$ for infinitely many $n$.
+    So, the thing you're proving here is that, almost surely, 
+    $X_n \geq \sqrt{n}$ for infinitely many $n$.
+\end{tcolorbox}
+\solution{
+    Because the $X_n$ are independent, the events $\set{|X_n| \geq \sqrt{n}}$
+    are independent, and we can appeal to the second Borel-Cantelli lemma.
+    It will suffice to show that $\sum_{n=1}^{\infty} \Pr( |X_n| \geq \sqrt{n} ) = \infty$.
+
+    Note that 
+    \begin{align*}
+        \sum_{n=1}^{\infty} \Pr( |X_n| \geq \sqrt{n} )
+            &= \sum_{n=1}^{\infty} \Pr \left( X_n^2 \geq n \right) \\
+            &= \sum_{n=1}^{\infty} \Pr \left( X_1^2 \geq n \right) \comm{$X_i$ are iid}
+    \end{align*}
+
+    Assume toward a contradiction that 
+    $\sum_{n=1}^{\infty} \Pr \left( X_1^2 \geq n \right) < \infty$.
+    Then, by the hint we have 
+    \[
+        \E X_n^2 
+        =
+        \sum_{n=1}^{\infty} \Pr \left( X_1^2 \geq n \right)
+        <
+        \infty. 
+    \]
+    However, we know that $\E X_1^2 = \text{Var}(X_1) = \infty$, so we have 
+    a contradiction. Therefore, it must be that 
+    $\sum_{n=1}^{\infty} \Pr \left( X_1^2 \geq n \right) = \infty$.
+
+    So, by the second Borel-Cantelli lemma, we know that 
+    \[
+        \Pr \left( \limsup_n \set{|X_n| \geq \sqrt{n}} \right)
+        =
+        1.
+    \]
+}

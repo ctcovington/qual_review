@@ -1,0 +1,565 @@
+\section{Convergence (BST 230 Module 12/13)}
+
+\subsection{Deterministic Convergence}
+
+\subsubsection{Convergence and limits}
+Let $x_{1:n}$ be a sequence of real numbers. We say that the sequence $(x_n)$
+converges to $x \in \R$ if 
+\[
+    \forall \epsilon > 0:
+    \exists N \in \N \text{ s.t. }
+    n \geq N \implies |x_n - x| < \epsilon. 
+\]
+
+In other words, for any level of ``closeness'' $\epsilon$, there is some point in the 
+sequence after which the sequence is always $\epsilon$-close to $x$.
+
+We denote convergence in a number of different ways:
+\begin{align*}
+    x_n &\rightarrow x \\
+    x_n &\rightarrow x \text{ as } n \rightarrow \infty \\
+    x_n &\stackrel{n \rightarrow \infty}{ \rightarrow } x \\
+    \lim_{n \rightarrow \infty} x_n &= x.
+\end{align*}
+
+As is often the case when we move from the finite to the infinite,
+our ideas no longer work quite as we might hope. 
+The idea that $|x_n - \infty| < \epsilon$
+is not well-defined, but it will still be useful for us to reason about 
+convergence to $\pm \infty$. We say that the sequence $(x_n)$ converges to $\infty$ 
+if 
+\[
+    \forall c \in \R:
+    \exists N \in \N \text{ s.t. }
+    n \geq N \implies x_n > c.
+\]
+Likewise, $x_n \rightarrow -\infty$ if $n \geq N \implies x_n < -c$.
+
+\subsubsection{The limit does not exist!}
+
+Limits are not guaranteed to exist; that is, it may be that a sequence $(x_n)$ 
+neither eventually settles around a real number $x$, nor explodes to $\pm \infty$.
+We'd still like to be able to reason about asymptotic behavior of the sequence 
+in this context, so we generalize the notion of limits to the \emph{liminf}
+and \emph{limsup}, which are guaranteed to exist.
+
+The liminf and limsup can be thought of as asymptotic lower/upper bounds on 
+the sequence $(x_n)$. In particular, let $\bar{R} = R \cup \set{-\infty, \infty}$.
+Then 
+\begin{align*}
+    \liminf_{n \rightarrow \infty} x_n 
+        &= \inf \set{ l \in \bar{R} : \forall \epsilon > 0, \exists N \in N \text{ s.t. } n \geq N \implies x_n > l - \epsilon } \\
+    \limsup_{n \rightarrow \infty} x_n 
+        &= \inf \set{ u \in \bar{R} : \forall \epsilon > 0, \exists N \in N \text{ s.t. } n \geq N \implies x_n < u + \epsilon }.
+\end{align*}
+
+It is always the case that $\liminf x_n \leq \limsup x_n$ and that $\lim x_n$, if 
+it exists, is sandwiched between them. Thus, one way to show that $\lim x_n = x$ 
+is to show that $\liminf x_n = \limsup x_n = x$.
+
+\subsection{Convergence of Random Variables}
+
+\subsubsection{(Almost) Sure Convergence}
+
+The ideas above from deterministic convergence can be generalized to 
+``probabilistic convergence'', i.e.\ the convergence of random variables.
+To show how this happens, we'll start with a notion of convergence of r.v.\ which 
+(I believe) was not covered in BST 230. 
+
+Suppose we have a sequence of random variables $(X_n) = \set{X_n}_{n \in \N}$
+each defined over a shared probability space $(\Omega, \cF, \Pr)$.
+
+\begin{definition}[Sure (Pointwise) Convergence]
+    The sequence $(X_n)$ converges surely to a r.v.\ $X$ if 
+    \[
+        \forall \omega \in \Omega:
+        \lim_{n \rightarrow \infty} X_n(\omega) = X(\omega).
+    \]
+\end{definition}
+
+Unpacking this a little, recall that we define random variables as 
+maps from the sample space $\Omega$ to $\R$. 
+The ``randomness'' comes from the probability function $\Pr$ 
+that assigns probabilities to elements of $\cF$ (i.e.\ subsets of $\Omega$).
+
+Sure convergence is not very interesting 
+from a probabilistic perspective, because it doesn't involve $(\cF, \Pr)$
+at all, but it's an instructive place to start. 
+From here, we can imagine a sequence which $(X_n)$ which isn't guaranteed to
+converge for every $\omega$, but for which the ``bad'' $\omega$ never occur 
+under our probability model.
+
+\begin{definition}[Almost sure convergence]
+    We say that $X_n$ converges to $X$ almost surely (that is, $X_n \cvas X$)
+    if for
+    \[
+        A = \set{ \omega \in \Omega: \lim_{n \rightarrow \infty} X_n(\omega) = X(\omega) }
+    \]
+    we have $\Pr(A) = 1$.
+\end{definition}
+
+Like sure convergence, it is very natural to think of almost sure convergence 
+in terms of deterministic convergence for individual $\omega$ values.
+Under almost sure convergence, there is 
+allowed to be a set of $\omega$ on which $X_n(\omega) \not\rightarrow X(\omega)$,
+but this set must have probability 0.
+
+\begin{fact}{Almost sure convergence (alternate definition)}
+    \label{fact:almost_sure_convergence}
+    $X_n \cvas X$ if and only if, for all $\epsilon > 0$:
+    \[
+        \Pr \left( \limsup_{n \rightarrow \infty} |X_n - X| < \epsilon \right)
+        =
+        1.
+    \]
+\end{fact}
+
+To show almost sure convergence, we typically use an (asymptotic) zero-one law,
+which give the conditions under which (asymptotically) a certain events happens 
+either with probability 0 or 1. The Borel-Cantelli Lemmas are examples of 
+zero-one laws.
+
+\begin{lemma}[First Borel-Cantelli]
+    Let $(E_n)$ be an infinite sequence of events in a probability space 
+    $(\Omega, \cF, \Pr)$. Then, 
+    \[
+        \sum_{n=1}^{\infty} \Pr(E_n) < \infty
+        \implies 
+        \Pr \left( \limsup_{n \rightarrow \infty} E_n \right) = 0.
+    \]
+\end{lemma}
+
+Note the connection here with Fact~\ref{fact:almost_sure_convergence};
+one can show $X_n \cvas X$ by showing that 
+$\sum_{n=1}^{\infty} \Pr \left( |X_n - X| > \epsilon \right) < \infty$
+for all $\epsilon > 0$.
+
+
+\begin{lemma}[Second Borel-Cantelli]
+    Let $(E_n)$ be an infinite sequence of independent events in a 
+    probability space $(\Omega, \cF, \Pr)$. Then,
+    \[
+        \sum_{n=1}^{\infty} \Pr(E_n) = \infty
+        \implies 
+        \Pr \left( \limsup_{n \rightarrow \infty} E_n \right) = 1.
+    \]
+\end{lemma}
+
+Perhaps the most famous use of an almost sure convergence result is in the 
+\emph{strong law of large numbers}.
+
+\begin{theorem}[Strong Law of Large Numbers]
+    Let $(X_i)$ be a sequence of iid random variables such that 
+    $\E X_i = \mu < \infty$. Then,
+    \[
+        n^{-1} \sum_{i=1}^{n} X_i 
+        \cvas
+        \mu.
+    \]
+\end{theorem}
+
+\subsubsection{Convergence in Probability}
+
+We now move to a weaker notion of convergence; \emph{convergence in probability},
+which we generally denote $X_n \cvPr X$.
+
+\begin{definition}[Convergence in probability]
+    A sequence $(X_i)$ converges in probability to $X$ if 
+    \[
+        \forall \epsilon > 0:
+        \Pr \left( |X_n - X| > \epsilon \right) \stackrel{n \rightarrow \infty}{\rightarrow} 0.
+    \]
+\end{definition}
+
+
+Convergence in probability isn't expressed as naturally as an extension of the 
+deterministic notion of convergence, but exploring why is illustrative.
+
+\begin{tcolorbox}
+    \textbf{Exercise \#1: The Typewriter Sequence}
+    Suppose $X \sim \text{Uniform}(0,1)$ and define 
+    \[ 
+        Y_n = \1{ X \in \left[ \frac{n - 2^k}{2^k}, \frac{n - 2^k + 1}{2^k} \right] }
+    \]
+    where, for each $n$, we choose $k = \lfloor \log_2(n) \rfloor$. 
+    For shorthand, we can write this as $Y_n = \1{X \in E_n}$
+
+    Show that $Y_n \cvPr 0$. As a bonus, show that $Y_n \not\cvas 0$. 
+\end{tcolorbox}
+\solution{
+    Let's first show that $Y_n \cvPr 0$. To do this, we want to show that 
+    for any $\epsilon > 0$ there exists and $N \in \N$ such that 
+    $n \geq N \implies \Pr(|Y_n| > \epsilon) \stackrel{n \rightarrow 0}{\rightarrow} 0$.
+
+    Fix $\epsilon \in (0,1)$, then $\set{|Y_n| > \epsilon} = \set{Y_n = 1}$.
+    Then we have 
+    \begin{align*}
+        \Pr(|Y_n| > \epsilon)
+            &= \Pr(Y_n = 1) \\
+            &= \Pr(X \in E_n) \\
+            &= |E_n| \comm{$X$ is uniform} \\
+            &= 2^{-k}.
+    \end{align*}
+    Because $k$ is monotone non-decreasing to $\infty$ in $n$, 
+    we know that $2^{-k}$ goes to 0 (as an implicit function of $n$), and 
+    so $Y_n \cvPr 0$.
+
+    Now we'll show that $Y_n \not\cvas 0$. Because $X \sim \text{Uniform}(0,1)$, when we view $X$ as a function from $\Omega = (0,1)$
+    to $\R$ $X$ becomes the identity function; $X(\omega) = \omega$ for $\omega \in (0,1)$.
+    For any $\omega \in (0,1)$ and $N \in \N$, we know there exists an $n \geq N$ 
+    (in fact, there are infinitely many such $n$) such that $Y_n(\omega) = 1$.
+    We can see this intuitively by observing that 
+    the events $E_n$ look like a typewriter as a function of $n$ (and implicitly $k$). 
+    The horizontal
+    area spanned by the indicator for $E_n$ scans across $[0,1]$ until it reaches 
+    the end, and then starts over, increasing $k$ by 1 so it
+    now operates at a finer resolution.
+    There's a nice animated demonstration of this phenomenon~\href{https://math.stackexchange.com/questions/1412091/the-typewriter-sequence}{here}.
+    On each full scan of $[0,1]$, there is guaranteed to be one value of $n$ where 
+    $E_n = 1$ for any given $\omega$.
+
+    Thus, $Y_n(\omega)$ cannot converge (in $n$) to 0 for any $\omega$,
+    so clearly $Y_n$ does not converge almost surely. 
+}
+
+This problem exhibits the sort of behavior that gives rise to a sequence 
+which converges in probability but not almost surely. At any given $n$, there 
+is a set of ``bad'' $\omega$ (in this case, $\omega$ such that $Y_n(\omega) = 1$).
+The set of bad $\omega$ changes as a function of $n$ but does get less and less likely 
+to be observed as $n$ increases.
+
+Just as we have a strong law of large numbers showing almost sure convergence, we 
+have weak laws showing convergence in probability under two different sets of conditions.
+
+\begin{theorem}[Weak Law of Large Numbers]
+    Suppose $(X_i)$ is a sequence of iid r.v.\ with $\E X_1 < \infty$.
+    Then,
+    \[
+        \bar{X}_n \cvPr \E X_1.
+    \]
+\end{theorem}
+
+\textbf{NOTE:} You will often see the WLLN stated with an assumption that 
+$\text{Var}(X_1) < \infty$ -- this is a bit confusing (to me) because it's 
+a stronger condition than the finite mean condition for the SLLN.
+This finite variance condition is not actually needed, but is often used 
+to make it possible to prove using Chebyshev's. We'll revisit this idea later.
+
+\begin{theorem}[Weak Law of Large Numbers (for uncorrelated variables)]
+    \label{thm:wlln}
+    Suppose $(X_i)$ is a sequence of uncorrelated r.v.\ and define 
+    $\bar{X}_n = n^{-1} \sum_{i=1}^{n}$. 
+
+    If $\E \bar{X}_n \rightarrow \mu$ and $\limsup n^{-1} \sum_{i=1}^{n} \text{Var}(X_i) < \infty$,
+    then 
+    \[
+        \bar{X}_n \cvPr \mu.
+    \]
+\end{theorem}
+
+\textbf{Note on Strong vs.\ Weak Laws:} The language of ``strong'' and ``weak''
+here refers to the type of convergence (almost sure vs.\ in probability), 
+but there are many conditions under which one could get these convergence results.
+So, when we say ``the'' strong/weak law, we really mean ``the most popular''
+strong/weak law. 
+
+\subsubsection{Convergence in Distribution}
+
+Suppose a sequence $(X_n) \rightarrow X$. 
+If it converges almost surely, this means that eventually $X_n(\omega) \approx X(\omega)$
+for all $\omega$ in sets with non-zero probability.
+If it converges in probability, then eventually $X_n \approx X$ with high probability 
+(over all possible sets of $\omega$). An even weaker notion is to 
+require only that the distribution of $X_n$ gets close to the distribution of $X$:
+
+\begin{definition}[Convergence in distribution]
+    For a r.v.\ $Y$ we call $F_Y$ its cdf.
+    A sequence of r.v.\ $(X_n)$ converges in distribution to $X$ if 
+    \[
+        F_{X_n}(x)
+        \stackrel{n \rightarrow \infty}{\rightarrow}
+        F_X(x)
+    \]
+    at all $x \in \R$ where $F_X$ is continuous.
+\end{definition}
+
+Because the cdf is not well-defined for multivariate random vectors, we have the 
+following more general definition:
+
+\begin{definition}[Convergence in distribution (more general)]
+    Let $(X_n)$ be a sequence of r.v.\ with $X_n \in \cX$. We say 
+    $X_n \cvd X$ if 
+    \[
+        \E g(X_n)
+        \rightarrow 
+        \E g(X)
+    \]
+    for all bounded, continuous functions $g: \cX \rightarrow \R$.
+\end{definition}
+
+Yet another definition which will sometimes be analytically convenient is to 
+use characteristic functions. Recall that the characteristic function of a 
+r.v.\ $X$ is given by $\phi_X(t) = \E \exp(itX)$.
+
+\begin{theorem}[Lévy's Continuity Theorem]
+    For a sequence of r.v.\ $(X_n)$ and r.v.\ $X$:
+    \[
+        X_n \cvd X
+        \iff 
+        \phi_{X_n}(t) \rightarrow \phi_{X}(t) \text{ for all } t \in \R.
+    \]
+\end{theorem}
+
+There are many ways to denote convergence in distribution, most of which involve 
+either a $d$ for ``distribution'' or $\cL$ for ``law''. We'll use the notation 
+$X_n \cvd X$.
+
+The most famous result we have about convergence in distribution is the 
+(Lindeberg-Levy) Central Limit Theorem. We'll give the more general multivariate 
+version for $k$-dimensional random vectors, which easily recovers the one-dimensional 
+version by setting $k=1$.
+
+\begin{theorem}[Lindeberg-Levy Central Limit Theorem]
+    Let $(X_i)$ be a sequence of iid $k$-dimensional random vectors 
+    with $\Sigma = \text{Cov}(X_1)$ and $\Sigma_{ij} < \infty$ for all $i,j \in [k]$.
+    Then,
+    \[
+        n^{-1/2} \sum_{i=1}^{n} (X_i - \E X_1)
+        \cvd 
+        N(0, \Sigma).
+    \]
+\end{theorem}
+
+Note that, with a bit of rearranging, we can state the LLNs as 
+$\bar{X} - \E X_1 \rightarrow 0$ (either a.s.\ or in probablity) and the (one-dimensional) LL-CLT as 
+$\sqrt{n} \left( \bar{X} - \E X_1 \right) \cvd N(0, \text{Var}(X_1))$.
+
+Much like the case of two WLLNs above, there exist other CLTs which, generally speaking, relax an assumption on 
+independence or identical distribution, at the cost of a stronger 
+assumption elsewhere. 
+
+\begin{theorem}[Lyapunov Central Limit Theorem]
+    Let $(X_i)$ be a sequence of independent r.v.\ with means 
+    $\mu_i = \E X_i$ and variances $\sigma^2_i = \text{Var}(X_i) < \infty$.
+    Define $s_n^2 = \sum_{i=1}^{n} \sigma_i^2$. 
+
+    If there exists some $\delta > 0$ such that 
+    \[
+        s_n^{-(2+\delta)} \sum_{i=1}^{n} \E |X_i - \mu_i|^{2+\delta} 
+        \rightarrow 
+        0,
+    \]
+    then,
+    \[
+        s_n^{-1} \sum_{i=1}^{n} (X_i - \mu_i)
+        \cvd
+        N(0,1).
+    \]
+\end{theorem}
+
+\subsubsection{Convergence in $L^p$}
+
+\begin{definition}[$L^p$ convergence]
+    Let $(X_n)$ be a sequence of r.v.\ with $X_n \in L^p$ for 
+    $p \geq 1$. Then 
+    we say that $X_n \cvL{p} X$ (i.e.\ $X_n$ converges to $X$ in $L^p$) 
+    if $X \in L^p$ and 
+    \[
+        \E |X_n - X|^p
+        \rightarrow 
+        0.
+    \]
+\end{definition}
+
+Note that $X_n \cvL{p} X \implies \E |X_n|^p \rightarrow \E |X|^p$.
+
+\subsubsection{Useful facts about convergence}
+
+\begin{fact}[Relationship between modes of convergence]
+    \begin{align*}
+        X_n \cvas X &\implies X_n \cvPr X \implies X_n \cvd X \\
+        X_n \cvL{p} &\implies X_n \cvPr X \implies X_n \cvd X
+    \end{align*}
+\end{fact}
+
+It may be that we know about the convergence of a sequence $X_n$ but want 
+to know whether a function of $X_n$ converges. For continuous functions, we 
+have a very clean result.
+
+\begin{theorem}[Continuous Mapping Theorem]
+    Let $(X_i)$ be a sequence of r.v.\ with $X_i \in \cX$ and let 
+    $g: \cX \rightarrow \R$ be almost surely continuous (i.e.\ the set $D \subset \cX$
+    where $g$ is discontinuous is such that $\Pr(X \in D) = 0$). Then,
+    \begin{align*}
+        X_n \cvas X &\implies g(X_n) \cvas g(X_n) \\
+        X_n \cvPr X &\implies g(X_n) \cvPr g(X_n) \\
+        X_n \cvd X &\implies g(X_n) \cvd g(X_n)
+    \end{align*}
+\end{theorem}
+
+\begin{theorem}[Slutsky's Theorem]
+    Let $(X_n), (Y_n)$ be sequences of r.v.\ such that 
+    $X_n \cvd X$ for some r.v.\ $X$ and $Y_n \cvPr c$ for a constant $c$.
+    Then,
+    \begin{align*}
+        X_n + Y_n &\cvd X + c \\
+        X_n Y_n \cvd Xc \\
+        \frac{X_n}{Y_n} \cvd \frac{X}{c} \text{ if } c \neq 0.
+    \end{align*}
+\end{theorem}
+
+\begin{theorem}[Delta Method]
+    Let $(X_n)$ be a sequence of r.v.\ such that 
+    \[
+        \sqrt{n}(X_n - \theta)
+        \cvd
+        N(0, \sigma^2)    
+    \]
+    for some $\theta \in \R, \sigma^2 > 0$. Then for any $g$ where 
+    $g(\theta \neq 0)$ and $g'(\theta)$ exists, we have
+    \[
+        \sqrt{n}(g(X_n) - g(\theta))
+        \cvd
+        N(0, g'(\theta)^2 \sigma^2).    
+    \]
+\end{theorem}
+
+\begin{tcolorbox}
+    \textbf{Exercise \#2}
+    Suppose $(X_i)$ is an iid sequence with $X_i \in [1, \infty)$ and 
+    $\mu = \E X_i < \infty$.
+
+    Define $T_n = \left( \prod_{i=1}^{n} X_i \right)^{1/n}$.
+    Does $T_n$ converge almost surely to a finite limit? If so, prove it.
+    If not, prove that it does not.
+\end{tcolorbox}
+\solution{
+    Define $Y_i = \log(X_i)$ and $S_n = n^{-1} \sum_{i=1}^{n} Y_i$.
+    Note that the $Y_i$ are iid (because the $X_i$ are iid). 
+    Moreover, we know $\E |Y_i| < \infty$ because 
+    $X_i > 1 \implies Y_i > 0$ and $Y_i < X_i \implies \E Y_i < \E X_i < \infty$.
+    So, we can appeal to the strong law of large numbers to say that 
+    $S_n \cvas \E Y_i$.
+
+    Now, by the continuous mapping theorem we know that $g(S_n) \cvas g \left( \E Y_i \right)$
+    for any almost surely continuous $g$. 
+    Define $g(s) = \exp(s)$. We know the exponential function is continuous 
+    everywhere, so it must be almost surely continuous with respect to $S_n$.
+    Therefore, we have $\exp \left( S_n \right) \cvas \exp \left( \E Y_i \right)$.
+
+    Now, note that 
+    \begin{align*}
+        \exp(S_n)
+            &= \exp \left( n^{-1} \sum_{i=1}^{n} Y_i \right) \\
+            &= \left( \prod_{i=1}^{n} \exp(Y_i) \right)^{1/n} \\
+            &= \left( \prod_{i=1}^{n} X_i \right)^{1/n} \\
+            &= T_n,
+    \end{align*}
+    and so we have $T_n \cvas \exp \left( \E Y_i \right)$.
+    By Jensen's we know that $\exp \left( \E Y_i \right) \leq \E \exp(Y_i) = \E X_i < \infty$,
+    and so $T_n$ converges almost surely to a finite limit.
+}
+
+
+\begin{tcolorbox}
+    \textbf{Exercise \#3: Proving WLLN with finite variance}
+    Prove the WLLN from Theorem~\ref{thm:wlln}, making the extra assumption that $\text{Var}(X_1) < \infty$. 
+
+    \textit{Hint:} Start by showing the asymptotic behavior of $|\bar{X}_n - \E \bar{X}_n|$.
+\end{tcolorbox}
+\solution{
+    We'll start by showing that $(\bar{X}_n - \E \bar{X}_n) \cvPr 0$.
+    Let $\epsilon > 0$ be arbitrary, then
+    \begin{align*}
+        \Pr (|\bar{X}_n - \E \bar{X}_n| > \epsilon)
+            &\leq \frac{ \text{Var}( \bar{X}_n ) }{\epsilon^2} \comm{Chebyshev's} \\
+            &= \frac{ n^{-2} \sum_{i=1}^{n} \sum_{j=1}^{n} \text{Cov}(X_i,X_j) }{ \epsilon^2 } \\
+            &= \frac{n^{-1} \sum_{i=1}^{n} \text{Var}(X_i)}{n \epsilon^2} \comm{$i \neq j$ terms are 0 bc of no correlation} \\
+            &\cvPr 0 \comm{numerator is finite, denominator $\rightarrow \infty$}.
+    \end{align*}
+    
+    Now, we know that $\E \bar{X}_n \rightarrow \mu$ -- note that this is 
+    deterministic convergence and thus, trivially, convergence in probability. 
+    So, by Slutsky's we have
+    \begin{align*}
+        \bar{X}_n
+            &= (\bar{X}_n - \E \bar{X}_n) + \E \bar{X}_n \\
+            &\cvPr 0 + \mu \\
+            &= \mu.
+    \end{align*}
+}
+
+\begin{tcolorbox}
+    \textbf{Exercise \#4}
+    Let $(X_n)$ be a sequence of r.v. Prove that if 
+    $X_n \cvd c$ for some constant $c \in \R$, then $X_n \cvPr c$.
+\end{tcolorbox}
+\solution{
+    We start with a definition of convergence in distribution.
+    Let $F_{X_n}$ be the cdf of $X_n$ and $F_c$ be the cdf of the constant 
+    function $c(x) = c$. Then, 
+    \[
+        F_{X_n}(x)
+        \rightarrow 
+        F_c(x)
+    \]
+    for all $x$ at which $F_c(x)$ is continuous. 
+    Note that 
+    \[
+        F_c(x)
+        =
+        \begin{cases}
+            0, &\text{ if } x < c \\
+            1, &\text{ otw},
+        \end{cases}
+    \]
+    so $F_c$ is continuous at all $x \neq c$. In particular then, 
+    for any $\epsilon > 0$ we know from $X_n \cvd c$ that 
+    \begin{align*}
+        F_{X_n}(c - \epsilon/2) &\rightarrow 0 \\
+        F_{X_n}(c + \epsilon/2) &\rightarrow 1.
+    \end{align*}
+    We know that $\Pr(X_n \in [c-\epsilon/2, c+\epsilon/2]) = F_{X_n}(c + \epsilon/2) - F_{X_n}(c - \epsilon/2)$
+    and that $\lim (a_n+b_n) = \lim a_n + \lim b_n$, so we get
+    \begin{align*}
+        \Pr \left( |X_n - c| > \epsilon \right)
+            &= 1 - \Pr \left( |X_n - c| \leq \epsilon \right) \\
+            &\leq 1 - \Pr \left( X_n \in [c-\epsilon/2, c+\epsilon/2] \right) \comm{ $\set{X_n \in [c-\epsilon/2, c+\epsilon/2]} \subseteq \set{|X_n - c| \leq \epsilon}$} \\
+            &= 1 - F_{X_n}(c+\epsilon/2) + F_{X_n}(c-\epsilon/2) \\
+            &\rightarrow 1 - 1 + 0 \\
+            &= 0.
+    \end{align*}
+    This is exactly the definition of $X_n \cvPr c$, so we're done.
+}
+
+\begin{tcolorbox}
+    \textbf{Exercise \#5: Proving WLLN without finite variance}
+    Prove the WLLN from Theorem~\ref{thm:wlln} without assuming that $\text{Var}(X_1) < \infty$.
+
+    \textit{Hint:} Use characteristic functions.
+    You can take as given that, for $X$ with $\E X = \mu < \infty$, we have 
+    \begin{align*}
+        \phi_{n^{-1} X}(t) &= \phi_X \left( n^{-1}t \right) \comm{Hint \# 1} \\
+        \phi_{X+Y}(t) &= \phi_X(t) \phi_Y(t) \comm{Hint \# 2} \\
+        \phi_X(t) &= 1 + it\mu + o(t) \comm{Hint \# 3} \\
+        \left( 1 + i \mu tn^{-1} + o(tn^{-1}) \right)^n &\stackrel{n \rightarrow \infty}{\rightarrow} \exp(it \mu) \comm{Hint \# 4}
+    \end{align*}
+\end{tcolorbox}
+
+\solution{
+    Our first goal is to show that $\bar{X}_n \cvd \mu$, which we'll do by showing pointwise convergence of the characteristic function.
+    Let $t$ be arbitrary:
+    \begin{align*}
+        \phi_{\bar{X}_n}(t)
+            &= \phi_{n^{-1} \sum_{i=1}^{n} X_i}(t) \comm{defn of $\bar{X}_n$} \\
+            &= \prod_{i=1}^{n} \phi_{X_i}(tn^{-1}) \comm{Hint \#1, \#2} \\
+            &= \phi_{X_1}(tn^{-1})^n \comm{$X_i$ are iid} \\
+            &= \left( 1 + i\mu tn^{-1} + o(tn^{-1}) \right)^n \comm{Hint \#3} \\
+            &\stackrel{n \rightarrow \infty}{\rightarrow} \exp \left( it \mu \right) \comm{Hint \#4} \\
+            &= \phi_{\mu}(t).
+    \end{align*}
+
+    So, we have pointwise convergence of the characteristic function, and thus 
+    $\bar{X}_n \cvd \mu$. $\mu$ is a constant, and so by the previous exercise 
+    we know that $\bar{X}_n \cvPr \mu$, which is our desired result.
+}

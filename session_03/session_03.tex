@@ -1,0 +1,41 @@
+\documentclass{article}
+\input{../preamble}
+\usepackage{ifthen}
+
+\newboolean{showsolutions}
+\setboolean{showsolutions}{false} % Set to false to hide solutions
+
+% Define a command to show or hide solutions
+\newcommand{\solution}[1]{
+    \ifthenelse{\boolean{showsolutions}}{
+        \vspace{1ex} % Add some space before the answer
+        \textbf{Solution:} #1 \qedsymbol \vspace{4ex}
+    }{
+        \vspace{60ex} % Add space for answer
+    }
+}
+
+\title{Qualifying Exam Prep Session \#3: Modes of Convergence and Stochastic Processes}
+\author{}
+\date{}
+
+\begin{document}
+    \maketitle
+
+    \input{convergence}
+    \input{stochastic_processes}
+    \input{extra_exercises}
+
+    % I will use the following shorthand to refer to various textbooks. Let me know if you want access
+    % and can't find them on your own.
+    % \begin{itemize}
+    %     \item C\&B: Casella \& Berger: Statistical Inference ($2^{\text{nd}}$ edition)
+    %     \item G\&S: Grimmett \& Stirzaker: One Thousand Exercises in Probability ($3^{\text{rd}}$ edition)
+    % \end{itemize}
+
+    % \input{basics}
+    % \input{expectation}
+    % \input{inequalities}
+    % \input{extra_exercises}
+
+\end{document}

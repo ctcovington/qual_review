@@ -1,0 +1,278 @@
+\section{Inequalities (Module 9 of BST 230 Notes)}
+
+\subsection{Basic Inequalities}
+
+We begin with a few inequalities immediately 
+implied by the probability axioms.
+
+\begin{theorem}[Boole's Inequality (Union Bound)]
+    \label{thm:union_bound}
+    For any events $A_1, A_2, \hdots$,
+    \[
+        \Pr \left( \cup_i^{\infty} A_i \right)
+        \leq
+        \sum_i^{\infty} \Pr(A_i).
+    \]
+\end{theorem}
+
+In general, we use Boole's Inequality to show that an event $E$ has 
+small probability. The general strategy is to identify $\set{A_i}$
+such that $E \subseteq \cup_i^{\infty} A_i$ and where you can 
+reason about $\Pr(A_i)$ individually for each $i$.
+
+\begin{theorem}[Bonferroni's Inequality]
+    \label{thm:bonferroni_inequality}
+    For any events $A_1, A_2, \hdots$,
+    \[
+        \Pr \left( \cap_i^{\infty} A_i \right)
+        \geq 
+        1 - \sum_{i=1}^{\infty} \Pr(A_i^c).
+    \]
+\end{theorem}
+
+Bonferroni's Inequality is useful for showing that a 
+set of events all occur with high probability.
+
+\begin{tcolorbox}
+    \textbf{Exercise \#4:}
+
+    Use Boole's inequality to prove Bonferroni's inequality.
+\end{tcolorbox}
+
+\solution{
+    \begin{align*}
+        \sum_i^{\infty} \Pr(A_i^c)
+            &\geq \Pr \left( \cup_i^{\infty} A_i^c \right) \comm{Boole's on $\set{A_i^c}$} \\
+            &= 1 - \Pr \left( \cup_i^{\infty} A_i^c \right)^c \comm{$\Pr(B) = 1-\Pr(B^c)$: implied by probability axioms} \\
+            &= 1 - \Pr \left( \cap_i^{\infty} A_i \right) \comm{De Morgan's Laws} \\
+    \implies \Pr \left( \cap_i^{\infty} A_i \right)
+            &\geq 1 - \sum_i^{\infty} \Pr(A_i^c).
+    \end{align*}
+}
+
+\subsection{Tail Inequalities}
+
+We often want to reason about the ``tails'' of a r.v.\ $X$, making statements 
+of the form $\Pr(|X| \geq a) \leq c$. If we know the distribution of $X$ 
+exactly, we can (at least in principle) give a very tight characterization of the 
+tails. What can we do if we don't know the distribution of $X$ exactly but, instead,
+know only some moments of $X$ and/or moments of functions of $X$?
+
+\begin{theorem}[Markov's Inequality]
+    Let $X$ be a non-negative r.v.\ with finite expectation and $a > 0$. Then,
+    \[
+        \Pr(X \geq a)
+        \leq
+        a^{-1} \E X.
+    \]
+\end{theorem}
+
+Markov's provides the basis for other commonly used tail inequalities:
+
+\begin{theorem}[Chebyshev's Inequality]
+    Let $X$ be a r.v.\ with finite variance and $a > 0$. Then,
+    \[
+        \Pr(|X - \E X| \geq a)
+        \leq
+        \frac{\text{Var}(X)}{a^2}
+    \]
+\end{theorem}
+
+Chebyshev's essentially takes $|X-\E X|$ to be the non-negative r.v.\ 
+in Markov's and assumes bounded second moment (instead of first).
+
+The Chernoff bound takes the idea from above a step further, using Markov's on the moment-generating function 
+of $X$, $M_X(t) = \E \exp(tX)$.
+
+\begin{theorem}[Chernoff Bound]
+    Let $X$ be a r.v.\ and $a \in \R$. Then,
+    \[
+        \Pr \left( X \geq a \right)
+        \leq
+        \inf_{t > 0} \exp(-ta) \E \exp(tX).
+    \]
+\end{theorem}
+
+\begin{tcolorbox}
+    \textbf{Exercise \#5}
+
+    Let $X \sim \text{Pois}(\lambda)$. Show that, for any $a > \lambda$:
+    \[
+        \Pr(X \geq a)
+        \leq
+        \exp(-\lambda) \left( \frac{\exp(1) \lambda}{a} \right)^a.
+    \]
+
+    \textit{Hint: } $M_X(t) = \exp \left( \lambda(\exp(t) - 1) \right)$
+\end{tcolorbox}
+\solution{
+    The fact that our bound is exponential strongly suggests that we use a Chernoff bound.
+
+
+    \begin{align*}
+        \Pr \left( X \geq a \right)
+            &\leq \inf_{t > 0} \exp(-ta) \E \exp(tX) \\
+            &= \inf_{t > 0} \exp(-ta) \exp \left( \lambda(\exp(t) - 1) \right) \\
+            &= \inf_{t > 0} \exp \left( \underbrace{-ta + \lambda \exp(t) - \lambda}_{\text{call this } g(t)} \right).
+    \end{align*}
+
+    Now let's minimize the term $\exp(g(t))$ with respect to $t$. Because $\exp(\cdot)$
+    is a monotone increasing function, it suffices to minimize $g(t)$.
+
+    \begin{align*}
+        g'(t)
+            &= -a + \lambda \exp(t) \\
+        g^{''}(t)
+            &= \lambda \exp(t) \\
+            &> 0.
+    \end{align*}
+    Our second derivative is positive, so setting $g'(t) = 0$ and solving for $t$ 
+    will yield a minimum as desired. This yields $t = \log \left( \frac{a}{\lambda} \right)$.
+    Note that we require $t > 0$ in our Chernoff bound,
+    so $\log \left( \frac{a}{\lambda} \right) > 0$ and thus this bound holds only for $a > \lambda$.
+    This is fine because we assumed this in the problem statement.
+
+    Plugging this back into our Chernoff bound, we get
+    \begin{align*}
+        \Pr \left( X \geq a \right)
+            &\leq \inf_{t > 0} \exp \left( -ta + \lambda \exp(t) - \lambda \right) \\
+            &= \exp \left( -a \log \left( \frac{a}{\lambda} \right) + \lambda \frac{a}{\lambda} - \lambda \right) \\
+            &= \exp \left( -a \log \left( \frac{a}{\lambda} \right) \right) \exp \left( \lambda \frac{a}{\lambda} - \lambda \right) \comm{$\exp(x+y) = \exp(x)\exp(y)$} \\
+            &= \left( \frac{\lambda}{a} \right)^a \exp \left( a - \lambda \right) \comm{$\exp(a x) = \exp(x)^a$, $\exp(-x) = \frac{1}{\exp(x)}$} \\
+            &= \left( \frac{\lambda}{a} \right)^a \exp(1)^a \exp(-\lambda) \\
+            &= \left( \frac{\exp(1) \lambda}{a} \right)^a \exp(-\lambda).
+    \end{align*}
+}
+
+\subsection{Jensen's Inequality and Friends}
+
+\begin{theorem}[Jensen's Inequality]
+    Let $X$ be a r.v.\ with range $\mathcal{X}$.
+    If $g: \mathcal{X} \rightarrow \R$ is convex, then 
+    \[
+        g(\E X)
+        \leq 
+        \E g(X).
+    \]
+\end{theorem}
+
+\begin{theorem}[Weighted AM-GM Inequality]
+    For any $x_{1:n} \geq 0$ and $w_{1:n} \geq 0$ s.t.\ $\sum_{i=1}^{n} w_i = 1$:
+    \[
+        w_{1:n}^T x_{1:n}
+        \geq
+        \prod_{i=1}^{n} x_i^{w_i}.
+    \] 
+\end{theorem}
+
+\begin{theorem}[Hoeffding's Inequality]
+    Suppose we have independent r.v.\ $X_{1:n}$ where $X_i \in [r_i, s_i]$.
+    If we define $S_n = \sum_{i=1}^{n} X_i$, then for all $a > 0$:
+    \[
+        \Pr \left( | S_n - \E S_n| \geq a \right)
+        \leq
+        2 \exp \left( - \frac{2a^2}{ \sum_{i=1}^n (s_i-r_i)^2} \right).
+    \]
+\end{theorem}
+ 
+Note the similarity between Hoeffding's and the Chernoff bound; each provides 
+a tail bound which is exponential in $a$. For Chernoff we know the 
+first moment of the moment-generating function, whereas for Hoeffding's 
+we need the r.v.\ to be bounded.
+
+\begin{tcolorbox}
+    \textbf{Exercise \#6: Azuma's Inequality}
+    Let $(Y_n)$ be a symmetric random walk such that $Y_0 = 0$ and, 
+    for all $n > 0$:
+    \[
+        Y_n
+        =
+        \begin{cases}
+            Y_{n-1} - 1, &\text{ w prob } 1/2 \\
+            Y_{n-1} + 1, &\text{ w prob } 1/2.
+        \end{cases}
+    \]
+
+    Show that 
+    \[
+        \Pr \left( |Y_n| > a \right)
+        \leq 
+        2 \exp \left( -\frac{a^2}{2n} \right).
+    \]
+\end{tcolorbox}
+\solution{
+    Let $\set{Z_i}_{i \in [n]}$ be independent Rademacher r.v.\ such that 
+    $Z_i = \pm 1$, each with probability $1/2$.
+    Note that $Z_i \in [-1,1]$, $Y_n = \sum_{i=1}^{n} Z_i$, and 
+    $\E Y_n = \sum_{i=1}^{n} \E Z_i = 0$. Thus, we can apply Hoeffding's as follows:
+    
+    \begin{align*}
+        \Pr \left( |Y_n| > a \right)
+            &\leq 2 \exp \left( - \frac{2a^2}{ \sum_{i=1}^n (1 - (-1))^2} \right) \\
+            &= 2 \exp \left( - \frac{2a^2}{4n} \right) \\
+            &= 2 \exp \left( -\frac{a^2}{2n} \right).
+    \end{align*}
+}
+
+\subsection{$L^p$ Inequalities}
+
+\begin{definition}[$L^p$ norm of a r.v.]
+    For $p\geq 1$, we define the $L^p$ norm of a r.v.\ $X$ as 
+    $\left( \E |X|^p \right)^{1/p}$. 
+
+    We say that $X \in L^p$ if $X$ has a finite $L^p$ norm.
+\end{definition}
+
+\begin{theorem}[H\"older Inequality]
+    Let $p,q > 1$ be such that $p^{-1} + q^{-1} = 1$. Then for r.v.\
+    $X, Y$:
+    \[
+        \E |XY|
+        \leq
+        \left( \E |X|^p \right)^{1/p}
+        \left( \E |Y|^q \right)^{1/q}.
+    \]
+\end{theorem}
+
+Many useful inequalities on $L^p$ norms follow from H\"older.
+
+\begin{itemize}
+    \item Cauchy-Schwarz: $\E |XY|
+        \leq
+        \left( \E |X|^2 \right)^{1/2}
+        \left( \E |Y|^2 \right)^{1/2}$
+    \item Lyapunov's: For $1 \leq r < s < \infty: X \in L^s \implies X \in L^r$
+    \item Minkowski's: For any $p \geq 1: \left( \E |X+Y|^p \right)^{1/2} \leq \left( \E |X|^p \right)^{1/p}
+    + \left( \E |Y|^p \right)^{1/p}$ 
+\end{itemize}
+
+Minkowski's is essentially the triangle inequality for $L^p$ norms.
+
+\begin{tcolorbox}
+    \textbf{Exercise \#7: Paley Zygmund Inequality}
+
+    Let $X$ be a non-negative r.v. with finite variance. 
+    Prove that, for all $\theta \in (0,1)$:
+    \[
+        \Pr \left( X \geq \theta \E X \right)
+        \geq
+        (1-\theta)^2 \frac{ (\E X)^2 }{\E X^2}.
+    \]
+
+    \textit{Hint: Use the law of total expectation and Cauchy-Schwarz}
+\end{tcolorbox}
+\solution{
+
+    \begin{align*}
+        \E X
+            &= \E \left( X\1{X \leq \theta \E X} \right) + \E \left( X\1{X > \theta \E X} \right) \comm{law of total expectation} \\
+            &\leq \underbrace{\theta \E X}_{\text{indicator}} + \underbrace{ \left(\E X^2\right)^{1/2} \left( \E \1{X > \theta \E X}\right)^{1/2}}_{\text{Cauchy-Schwarz}} \\
+    \implies (1-\theta) \E X
+            &\leq \left(\E X^2\right)^{1/2} \left( \E \1{X > \theta \E X}\right)^{1/2} \comm{algebra} \\
+    \implies (1-\theta)^2 (\E X)^2
+            &\leq \E X^2 \cdot \E \1{ X > \theta \E X } \comm{both sides $\geq 0$, so squaring maintains $\leq$} \\
+    \implies (1-\theta)^2 \frac{(\E X)^2}{\E X^2}
+            &\leq \E \1{ X > \theta \E X } \\
+            &= \Pr \left( X > \theta \E X \right).
+    \end{align*}
+}
