@@ -1,0 +1,146 @@
+# Extra Exercises
+
+## Exercise #4: Neyman-Scott "Paradox"
+
+Consider pairs of random variables $(X_i, Y_i)$ for $i \in \{1,\dots,n\}$ where 
+$$
+X_i \stackrel{i.i.d.}{\sim} N(\mu_i, \sigma^2)
+\quad
+Y_i \stackrel{i.i.d.}{\sim} N(\mu_i, \sigma^2).
+$$
+
+**Part (a)**
+Find the MLE for $\sigma^2$. What do you think of the MLE as an estimator of $\sigma^2$?
+
+<details>
+<summary style="font-weight: bold; cursor: pointer;">Solution</summary>
+
+<br>
+
+We begin by writing the likelihood as 
+$$
+\ell( \mu_i, \sigma^2 \vert x_i,y_i )
+=
+p( x_i,y_i \vert \mu_i, \sigma^2 )
+=
+(2 \pi \sigma^2)^{-n}
+\exp \left( -\frac{1}{2 \sigma^2} \sum\limits_{i=1}^{n} \left[ (x_i-\mu_i)^2 + (y_i-\mu_i)^2 \right] \right).
+$$
+
+The partial derivatives of the log-likelihood are
+$$
+\begin{align*}
+\frac{\partial \ell}{\partial \mu_i}
+    &= \frac{x_i + y_i - 2 \mu_i}{\sigma^2} \\
+\frac{\partial \ell}{\partial \sigma^2}
+    &= -\frac{n}{\sigma^2} + \frac{1}{2 \sigma^2} \sum\limits_{i=1}^{n} \left[ (x_i-\mu_i)^2 + (y_i - \mu_i)^2 \right].
+\end{align*}
+$$
+
+We set these both to 0 and solve for $\hat{\mu}_i, \hat{\sigma}^2$, which yields
+$$
+\begin{align*}
+    \hat{\mu}_i
+        &= \frac{1}{2} (x_i + y_i) \\
+    \hat{\sigma}^2
+        &= \frac{1}{4n} \sum\limits_{i=1}^{n} (x_i-y_i)^2.
+\end{align*}
+$$
+
+$\hat{\sigma}^2$ is not a very good estimator of $\sigma^2$.
+Notably, $\mathbb{E} \left[ \hat{\sigma}^2 \right] = \frac{1}{4} \mathbb{E} \left[ (x_i-y_i)^2 \right] = \frac{\sigma^2}{2}$, because $X_i-Y_i \stackrel{i.i.d.}{\sim} N(\mu=0, 2\sigma^2)$.
+That is, the expected value of the MLE is $\frac{1}{2}$ the parameter we're trying to estimate, even asymptotically.
+
+</details>
+
+**Part (b)**
+
+Try implementing a Bayesian model for this problem. 
+Empirically, do you encounter the same issue as you found with the MLE? Use the following code to generate the data.
+
+```{r}
+set.seed(1)
+n <- 1000
+sigma_true <- 2
+mu_true <- rnorm(n, 0, 1)
+X <- matrix(rnorm(n * 2, rep(mu_true, each = 2), sigma_true), nrow = n, byrow = TRUE)
+```
+
+<details>
+<summary style="font-weight: bold; cursor: pointer;">Solution</summary>
+
+<br>
+
+We begin by specifying the model. Let $TN(m,s^2,a,b)$ be a $N(m,s^2)$ distribution truncated to $(a,b)$. The likelihood for $X_i,Y_i$ is given by the problem setup, the only other components we absolutely need are priors on our parameters $\mu_i, \sigma^2$. Because $\mu_i$ differs by $i$,
+we choose to put priors on the parameters on our prior for $\mu_i$ (we call these *hyperpriors*).  
+One advantage of this, other than further expressing our uncertainty in the underlying process, is that we could get a posterior both on any individual $\mu_i$, but also on their global mean $\mu_0$.
+$$
+\begin{align*}
+    X_i &\sim N(\mu_i, \sigma^2) \\
+    Y_i &\sim N(\mu_i, \sigma^2) \\
+    \mu_i &\sim N(\mu_0, \tau^2) \\
+    \sigma &\sim TN(0, 10^2, 0, \infty) \\
+    \mu_0 &\sim N(0, 10^2) \\
+    \tau &\sim TN(0, 10^2, 0, \infty).
+\end{align*}
+$$
+
+Next we implement the model in nimble.
+
+```{r}
+#| message: false
+
+model_spec <- nimbleCode({
+  mu0 ~ dnorm(0, sd = 10) # weakly informative prior on mu_0
+  tau ~ T(dnorm(0, sd = 10), 0, )  # half-normal prior on tau
+  sigma ~ T(dnorm(0, sd = 10), 0, ) # half-normal prior on sigma
+  for (i in 1:n) {
+    for (j in 1:2) {
+      X[i, j] ~ dnorm(mu[i], sd = sigma) # model for X[i, 1:2] = (x_i, y_i)
+    }
+    mu[i] ~ dnorm(mu0, sd = tau) # prior on mu_i
+  }
+})
+
+# Constants, data, and initial values
+data_list <- list(X = X)
+constants <- list(n = n)
+inits <- list(
+  mu = rowMeans(X),
+  mu0 = mean(rowMeans(X)),
+  tau = 1,
+  sigma = 1
+)
+
+# Build and compile model
+model <- nimbleModel(model_spec, data = data_list, inits = inits, constants = constants)
+cModel <- compileNimble(model)
+
+# Configure and build MCMC
+conf <- configureMCMC(model, monitors = c('mu0', 'tau', 'sigma'))
+mcmc <- buildMCMC(conf)
+cMCMC <- compileNimble(mcmc, project = model)
+
+# Run MCMC
+samples <- runMCMC(cMCMC, niter = 10000, nburnin = 2000, thin = 5, summary = TRUE)
+
+# get summary statistics for posterior
+print(samples$summary)
+```
+
+We see from our posterior summary that our posterior on $\sigma$ is centered close to the true sigma value of 2, certainly better than the value of $\sqrt{2}$ that we would get from the MLE.
+
+```{r}
+# plot posterior for sigma
+posterior_df <- data.frame(samples$samples)
+ggplot(posterior_df, aes(x = sigma)) + 
+    geom_histogram(fill = "steelblue", color = "white", bins = 100) +
+  labs(
+    title = expression("Posterior distribution of" ~ sigma),
+    x = expression(sigma),
+    y = "frequency"
+  ) +
+  theme_minimal()
+```
+
+</details>

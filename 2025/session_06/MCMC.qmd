@@ -1,0 +1,293 @@
+# (Markov Chain) Monte Carlo
+
+## Monte Carlo Approximation
+
+In Bayesian statistics, many inferential tasks involve 
+computing some sort of expectation 
+$$
+\mathbb{E} h(Y)
+=
+\int h(y) p(y) dy.
+$$
+
+We may not know $\mathbb{E} h(Y)$ analytically, but as long as we 
+can sample from $p(y)$ we should be able to (1) estimate $\mathbb{E} h(Y)$ well and (2) characterize the uncertainty in our estimate.
+
+To do so we draw on our knowledge from Prob I.
+Let $(Y_1, \dots, Y_m)$ be draws from $p(y).$ Then 
+$$
+\bar{h}_m
+=
+m^{-1} \sum\limits_{j=1}^{m} h(Y_j)
+$$
+has a number of nice properties which are implied by the strong law of large numbers and central limit theorem. In particular, provided that $\mathbb{E} \left[ h(Y)^2 \right] < \infty$, we have
+$$
+\begin{align*}
+    \bar{h}_m &\stackrel{\textrm{a.s.}}{\rightarrow} \mathbb{E} h(Y) \\
+    \mathbb{E}[\bar{h}_m] &= \mathbb{E} h(Y) \\
+    \textrm{Var} \left( \bar{h}_m \right) &= m^{-1} \int_{\mathcal{Y}} ( h(y) - \mathbb{E}[h(Y)] )^2 f(y)dy \\
+        &\approx m^{-1} \sum\limits_{j=1}^{m} ( h(Y_j) - \bar{h}_m )^2 := \hat{\sigma}^2_m \\
+    \bar{h}_m &\rightarrow N \left( \mathbb{E} h(Y), m^{-1} \textrm{Var} [h(Y)] \right) \\
+    &\approx N \left( \mathbb{E} h(Y), m^{-1} \hat{\sigma}^2_m \right)
+\end{align*}
+$$
+
+So, $\bar{h}_m \pm 1.96 \frac{\hat{\sigma}_m}{\sqrt{m}}$ is 
+an asymptotic 95% confidence interval for $\mathbb{E} h(Y)$. 
+
+### Exercise #2: Monte Carlo approximation to the posterior predictive
+
+Suppose we have a similar setup as Exercise #1, 
+with $X_{1:n} \stackrel{\textrm{i.i.d.}}{\sim} \textrm{Exp}(\theta)$
+and a prior of $\theta \sim \textrm{Gamma}(\alpha = 2, \beta = 2)$.
+
+Now suppose we observe the following `x` vector:
+
+```{r}
+set.seed(1)
+n <- 10
+x <- runif(n)
+x <- x / sum(x) * 10
+
+x
+```
+
+**Part (a)**
+
+Use a Monte Carlo algorithm to approximate the posterior predictive 
+density $p(x_{n+1} \vert x_{1:n})$ at the point $x_{n+1} = 0$.
+
+<details>
+<summary style="font-weight: bold; cursor: pointer;">Solution</summary>
+
+<br>
+
+Recall from Exercise #1 that the Gamma is a conjugate prior for the Exponential$(\theta)$ 
+data model, so we know that the posterior on $\theta$ is Gamma$(\alpha', \beta')$,
+where $\alpha' = \alpha + n$ and $\beta' = \beta + \sum\limits_{i=1}^{n} x_i$.
+From here, we can implement our Monte Carlo algorithm, repeatedly sampling $\theta$
+from the Gamma$(\alpha', \beta')$ posterior and evaluating the exponential density at 0 for each posterior $\theta$ value.
+
+```{r}
+# set up parameters
+n <- length(x)
+alpha <- 2
+beta <- 2
+
+# use conjugacy (Exercise 1) to get alpha', beta' analytically
+alpha_p <- alpha + n
+beta_p <- beta + sum(x)
+
+# repeatedly sample from posterior, then evaluate posterior predictive density at 0
+n_draws <- 10^3
+pp_draws <- rep(0, n_draws)
+for (i in 1:n_draws) {
+    # draw from posterior on theta
+    posterior_theta <- rgamma(1, shape = alpha_p, rate = beta_p)
+
+    # evaluate density at x = 0 given posterior theta
+    pp_draws[i] <- dexp(0, rate = posterior_theta)
+}
+
+# plot histogram of posterior predictive
+ggplot(data.frame(pp_draws), aes(x = pp_draws)) +
+  geom_histogram(fill = "steelblue", color = "white", bins = 100) +
+  labs(
+    title = "Monte Carlo draws",
+    x = "density",
+    y = "frequency"
+  ) +
+  theme_minimal()
+
+# get approximate posterior predictive at 0
+a <- mean(pp_draws)
+glue("Monte Carlo approximation: {a}")
+```
+
+</details>
+
+**Part (b)**
+
+Empirically verify the claim that $\bar{h}_m$ is asymptotically normal.
+(A very rough visual verification will do).
+
+<details>
+<summary style="font-weight: bold; cursor: pointer;">Solution</summary>
+
+<br>
+
+We run the same procedure as in part (a), but over a large number of repeated simulations.
+
+```{r}
+n_sims <- 10^4
+ests <- rep(0, n_sims)
+for (j in 1:n_sims) {
+    pp_draws <- rep(0, n_draws)
+    for (i in 1:n_draws) {
+        # draw from posterior on theta
+        posterior_theta <- rgamma(1, shape = alpha_p, rate = beta_p)
+
+        # evaluate density at x = 0 given posterior theta
+        pp_draws[i] <- dexp(0, rate = posterior_theta)
+    }
+    ests[j] <- mean(pp_draws)
+}
+ggplot(data.frame(ests), aes(x = ests)) +
+  geom_histogram(fill = "steelblue", color = "white", bins = 100) +
+  labs(
+    title = expression("Asymptotic distribution of" ~ bar(h)[m]),
+    x = expression(bar(h)[m]),
+    y = "frequency"
+  ) +
+  theme_minimal()
+```
+
+</details>
+
+One can do better than naïve Monte Carlo sampling with more advanced approaches,
+such as Importance Sampling.
+
+Suppose, as above, that we have continuous random variables 
+$(Y_1, \dots, Y_n)$ from a distribution with density $p(y)$.
+Define a density $q$ on the same space where $p(y) > 0 \implies q(y) > 0$.
+
+We don't assume that we know $p$ or $q$ directly, only that we know them each up to their own normalizing constant; we'll call the versions we know 
+$\tilde{p}, \tilde{q}$ and define 
+$$
+\tilde{w}(y)
+=
+\begin{cases}
+    \frac{\tilde{p}(y)}{\tilde{q}(y)}, &\text{ if } \tilde{q}(y) > 0 \\
+    0 &\text{ if } \tilde{q}(y) = 0.
+\end{cases}
+$$
+
+Then an importance sampling-based approximation to $\mathbb{E} h(Y)$ looks like
+$$
+\begin{align*}
+    \mathbb{E} h(Y)
+        &= \sum\limits_{i=1}^{n} \left( \frac{\tilde{w}(Z_i)}{ \sum\limits_{j=1}^{n} \tilde{w}(Z_j) } \right)
+\end{align*},
+$$
+where $Z_{1:n} \stackrel{\textrm{i.i.d.}}{\sim} q$.
+That is, we need to be able to sample from $q$, but we need only know the actual density up to a normalizing constant.
+
+To minimize approximation error, we want to choose a $q$ such that $q(x) \approx h(x) p (x)$, though in general we err on the side of choosing a more diffuse (spread out) $q$.
+
+## Markov Chain Monte Carlo
+
+There are cases where we can't sample directly from $p$, and 
+it seems difficult to choose a good $q$ -- this happens quite regularly in 
+high-dimensional models.
+
+The most common way to construct an MCMC algorithm is with something called the *Metropolis-Hastings algorithm*. Suppose we want to sample from $p(x)$ and for arbitrary $x'$ call $q(x \vert x')$ the proposal distribution (from which we can sample). For every $(x,x')$ pair we define the acceptance ratio
+$$
+\alpha(x', x)
+=
+\frac{p(x') q(x \vert x')}{p(x) q(x' \vert x)}.
+$$
+
+::: {.callout-note icon=false}
+## Metropolis-Hastings
+
+Initialize $x_0$ and draw $T$ samples as follows. 
+For each $t \in \{1,\dots,T\}$:
+
+**Step (1):** Sample $x \sim q(x \vert x_{t-1})$
+
+**Step (2):** Sample $u \sim \textrm{Uniform}(0,1)$
+
+**Step (3):** If $u < \alpha(x_{t-1}, x)$ then set $x_t = x$. Otherwise, set $x_t = x_{t-1}$
+:::
+
+MCMC is an incredibly general class of tools for sampling in these settings. A key difference between MC and MCMC algorithms is that the samples we get from MCMC are correlated. In practice, we often perform *thinning* (actually using only every $k^{th}$ MCMC sample) to reduce the correlation between our samples.
+
+One of the most popular versions of Metropolis-Hasting is called the *Gibbs sampler*.
+Suppose we have a $D$-dimensional parameter vector $\theta = (\theta_1, \dots, \theta_D)$ and want to sample from the posterior $p(\theta \vert x)$, but it's too complex to sample directly.
+
+The Gibbs sampler iteratively samples from $p(\theta_d \vert x, \theta_{-d})$
+for each $d \in \{1,\dots,D\}$, where $\theta_{-d}$ is the full $\theta$ 
+without its $d^{th}$ component. As we iterate through the elements of $\theta$,
+we condition on the updated values. That is, 
+
+::: {.callout-note icon=false}
+## Gibbs Sampling
+
+Initialize $\theta^{(0)} \in \mathbb{R}^D$.
+For each $t \in \{0,\dots,T-1\}$:
+
+$$
+\begin{align*}
+    \theta_1^{(t+1)} 
+        &:= \theta_1^* \sim p \left( \theta_1^{(t+1)} \vert x, \theta_{-1}^{(t)} \right) \\
+    \theta_2^{(t+1)} 
+        &:= \theta_2^* \sim p \left( \theta_2^{(t+1)} \vert x, \theta_1^{(t+1)}, \theta_{-(1:2)}^{(t)} \right) \\
+        &\vdots \\
+    \theta_d^{(t+1)}
+        &:= \theta_d^* \sim p \left( \theta_d^{(t+1)} \vert x, \theta_{1:(d-1)}^{(t+1)}, \theta_{-(d+1:D)}^{(t)} \right) \\
+        &\vdots \\
+    \theta_D^{(t+1)}
+        &=: \theta_D^* \sim p \left( \theta_D^{(t+1)} \vert x, \theta_{1:(D-1)}^{(t+1)} \right).
+\end{align*}
+$$
+:::
+
+### Exercise #3: Gibbs Sampling as Metropolis-Hastings
+
+Each time we update a component of $\theta$, we are performing 
+a Metropolis-Hastings move. Prove that this is the case.
+It is sufficient to state, in the Gibbs sampling context, (i) what is $p$, (ii) what is $q$, and (iii) what is $\alpha$.
+
+<details>
+<summary style="font-weight: bold; cursor: pointer;">Solution</summary>
+
+<br>
+
+::: {.callout-note icon=false}
+This solution comes almost verbatim from Gregory Gundersen's blog, which I highly recommend in general for anyone looking to learn more about fundamentals of Bayesian statistics. [@gundersen2020MH]
+:::
+
+
+In this case our target distribution $p$ is the full posterior 
+$p(\theta \vert x)$ and, at any given step, our proposal $q$ is of the form $p \left( \theta_d^{(t+1)} \vert x, \theta_{1:(d-1)}^{(t+1)}, \theta_{-(d+1:D)}^{(t)} \right)$. 
+When manipulating $p,q$ below, we will elide the superscript notation tracking the exact
+iteration of the algorithm.
+
+It will be important for us to note that 
+$$
+p(\theta \vert x)
+=
+p( \theta_d, \theta_{-d} \vert x )
+=
+p(\theta_d \vert x, \theta_{-d}) p(\theta_{-d} \vert x).
+$$
+
+In general, we know that 
+$\alpha(\theta^*, \theta)=\frac{p(\theta) q(\theta^* \vert \theta)}{p(\theta^*) q(\theta \vert \theta^*)}$, where $p,q$ are the target and proposal described above. 
+In our Gibbs sampling context, this becomes
+$$
+\begin{align*}
+    \alpha(\theta^*, \theta)
+        &=\frac{p(\theta^* \vert x) p(\theta_d \vert x,\theta_{-d})}
+               {p(\theta \vert x) p(\theta^*_d \vert x,\theta^*_{-d})} \\
+        &= \frac{
+    \textcolor{blue}{p(\theta_d^\star \vert x, \theta^\star_{-d})}
+    \textcolor{red}{p(\theta_{-d}^\star \vert x)}
+    \textcolor{olive}{p(\theta_d \vert x, \theta_{-d})}
+}{
+    \textcolor{olive}{p(\theta_d \vert x, \theta_{-d})}
+    \textcolor{red}{p(\theta_{-d} \vert x)}
+    \textcolor{blue}{p(\theta_d^\star \vert x, \theta^\star_{-d})}
+} \\
+    &= 1.
+\end{align*}
+$$
+
+So we have $\alpha(\theta^*, \theta) = 1$. In other words, Gibbs sampling uses 
+Metropolis-Hastings moves where the acceptance probability is 1.
+
+</details>
+
+
+
+

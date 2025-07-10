@@ -1,0 +1,56 @@
+# Conjugate Priors
+
+Suppose we have a data model $\mathcal{M} = \left\{ p(x \vert \theta) : \theta \in \Theta \right\}$ and a set $\mathcal{X}$ of data sets which are possible under $\mathcal{M}$. We 
+call $\mathcal{P} = \left\{ p_{\alpha}(\theta) : \alpha \in H \right\}$ a *conjugate prior* if, 
+$$
+\forall \alpha \in H, \forall x \in \mathcal{X}:
+\exists \alpha' \in H \text{ s.t. } p(\theta \vert x) = p_{\alpha'}(\theta).
+$$
+
+Using a conjugate prior for a particular problem comes with two huge advantages. The first is a computational/practical advantage; for every conjugate prior I'm aware of, we 
+have a known map from $x$ to $\alpha'$; in other words, we 
+have a closed-form solution for the posterior. The second is a conceptual 
+advantage; if we interpret the prior as representing belief, it seems 
+nice that when we update our beliefs they stay within the same 
+family of distributions.
+
+### Exercise #1: Conjugate Priors
+
+Suppose we have $X_{1:n} \stackrel{\textrm{i.i.d.}}{\sim} \textrm{Exp}(\theta)$
+such that $p(x_i \vert \theta) = \theta \exp(-\theta x_i) \mathbf{1}(x > 0)$.
+
+The Gamma$(\alpha,\beta)$ distribution (with its shape/rate parameterization) is given by 
+$$
+\textrm{Gamma}(\theta \vert \alpha, \beta)
+=
+\frac{\beta^{\alpha}}{\Gamma(\alpha)}
+\theta^{\alpha-1}
+\exp(-\beta \theta)
+\mathbf{1}(\theta > 0).
+$$
+
+Show that the Gamma distribution is a conjugate prior for the Exponential data model,
+and find the posterior in terms of $x_{1:n}$.
+
+<details>
+<summary style="font-weight: bold; cursor: pointer;">Solution</summary>
+
+<br>
+$$
+\begin{align*}
+    p(\theta \vert x_{1:n})
+        &\propto p(x_{1:n} \vert \theta) p(\theta) \\ 
+        &= \left( \prod_{i=1}^{n} p(x_i \vert \theta) \right) p(\theta) && \text{ ($x_i \sim $ i.i.d.) } \\ 
+        &= \left( \prod_{i=1}^{n} \theta \exp(- \theta x_i) \mathbf{1}(x_i > 0) \right) \frac{\beta^{\alpha}}{\Gamma(\alpha)} \theta^{\alpha-1} \exp(-\beta \theta) \mathbf{1}(\theta > 0) \\ 
+        &= \theta^n \exp(-\theta \sum_{i=1}^{n}x_i \mathbf{1}(x_i > 0) ) \frac{\beta^{\alpha}}{\Gamma(\alpha)} \theta^{\alpha-1} \exp(-\beta \theta) \mathbf{1}(\theta > 0) \\
+        &= \frac{\beta^{\alpha}}{\Gamma(\alpha)} \theta^{n + \alpha - 1}
+           \exp \left( - \theta (\beta + \sum_{i=1}^{n} x_i \mathbf{1}(x_i > 0)) \right) \\ 
+        &\propto \frac{\beta'^{\alpha'}}{\Gamma(\alpha')} \theta^{\alpha'-1} \exp \left( -\theta\beta' \right) \\ 
+        &= \textrm{Gamma}(\alpha', \beta'), 
+\end{align*}
+$$
+where $\alpha' = \alpha + n$ and $\beta' = \beta + \sum_{i=1}^{n}x_i$.
+
+</details>
+
+

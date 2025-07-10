@@ -218,10 +218,10 @@ Solution
         &amp;= \theta^n \exp(-\theta \sum_{i=1}^{n}x_i \mathbf{1}(x_i &gt; 0) ) \frac{\beta^{\alpha}}{\Gamma(\alpha)} \theta^{\alpha-1} \exp(-\beta \theta) \mathbf{1}(\theta &gt; 0) \\
         &amp;= \frac{\beta^{\alpha}}{\Gamma(\alpha)} \theta^{n + \alpha - 1}
            \exp \left( - \theta (\beta + \sum_{i=1}^{n} x_i \mathbf{1}(x_i &gt; 0)) \right) \\
-        &amp;\propto \frac{\beta'^{\alpha'}}{\Gamma(\alpha')} \theta^{\alpha'} \exp \left( -\theta\beta' \right) \\
+        &amp;\propto \frac{\beta'^{\alpha'}}{\Gamma(\alpha')} \theta^{\alpha'-1} \exp \left( -\theta\beta' \right) \\
         &amp;= \textrm{Gamma}(\alpha', \beta'),
 \end{align*}
-\]</span> where <span class="math inline">\(\alpha' = \alpha + n\)</span> and <span class="math inline">\(\beta' = \beta + \sum_{i=1}^{n}x_i \mathbf{1}(x_i &gt; 0)\)</span>.</p>
+\]</span> where <span class="math inline">\(\alpha' = \alpha + n\)</span> and <span class="math inline">\(\beta' = \beta + \sum_{i=1}^{n}x_i\)</span>.</p>
 </details>
 </section>
 </section>
@@ -599,7 +599,7 @@ sigma  2.06521810  2.06356749 0.04663321  1.9791568 2.16365277
 tau    1.00375123  1.00912569 0.08681287  0.8154659 1.15982013</code></pre>
 </div>
 </div>
-<p>We see from our posterior summary that our posterior on <span class="math inline">\(\sigma\)</span> is centered close to the true sigma value of 2, certainly better than the value of 1 that we would get from the MLE.</p>
+<p>We see from our posterior summary that our posterior on <span class="math inline">\(\sigma\)</span> is centered close to the true sigma value of 2, certainly better than the value of <span class="math inline">\(\sqrt{2}\)</span> that we would get from the MLE.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># plot posterior for sigma</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>posterior_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(samples<span class="sc">$</span>samples)</span>

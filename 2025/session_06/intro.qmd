@@ -1,0 +1,38 @@
+# Introduction
+
+Inference within the Bayesian framework is conceptually very simple, it 
+all follows from the rules of probability! The analyst starts with a data model 
+$\mathcal{M} = \left\{ p(x \vert \theta) : \theta \in \Theta \right\}$ 
+for how the world generates data from parameters, as well as prior beliefs 
+about the parameters encoded in a probability distribution $p(\theta)$.
+Bayes' Theorem provides the machinery needed to turn the analyst's 
+prior beliefs into *posterior beliefs*,
+$$
+    p(\theta \vert x)
+    =
+    \frac{p(x \vert \theta) p(\theta)}{p(x)}
+    \propto 
+    p(x \vert \theta) p (\theta),
+$$
+where $p(x) = \int\limits_{\theta \in \Theta} p(x \vert \theta) p (\theta) d \theta$.
+
+The posterior $p(\theta \vert x)$ is typically the core element of interest 
+in a Bayesian analysis, much like point estimates and confidence regions might be in a Frequentist analysis. 
+
+## Terminology
+
+- **Prior:** $p(\theta)$
+    - This is traditionally taught as a representation of the analyst's beliefs (I even described it as such above). However, there are other approaches such as *Objective Bayes* [@berger2024objective] and *Pragmatic Bayes* (this isn't a well-defined term, but I'm referring to the philosophy advanced in [@gelman2013bayesian]) which are probably closer to how people tend to perform Bayesian inference in practice. This is where we see ideas like weakly informative priors (more associated with the pragmatic school), reference priors (more associated with the objective school), etc.
+
+- **Posterior:** $p(\theta \vert x)$
+    - Essentially all information conveyed in a Bayesian analysis is based on the posterior.
+
+- **Marginal Likelihood:** $p(x)$
+    - Often difficult to calculate, typically used just for normalization (ensuring the posterior is a valid probability distribution)
+    - Sometimes written $p(x \vert \mathcal{M}) = \int\limits_{\theta \in \Theta} p(x \vert \theta, \mathcal{M}) p(\theta \vert \mathcal{M}) d \theta$, acknowledging that everything we do in Bayesian analysis is really conditional on the analyst's choice of the data model $\mathcal{M}$. 
+        - When written conditional on $\mathcal{M}$, it becomes more clear conceptually that this can be used for model comparison.
+
+- **Posterior Predictive** $p(x^{\textrm{rep}} \vert x) = \int\limits_{\theta \in \Theta} p(x^{\textrm{rep}} \vert \theta) p(\theta \vert x) d \theta$
+    - Makes model "generative"
+    - Useful for model checking/criticism, enables the *posterior predictive check* [@gelman2013bayesian]. 
+      If observed $x$ is inconsistent with $p(x^{\textrm{rep}} \vert x)$, this suggests a problem with the prior or data model. 
